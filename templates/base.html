@@ -12,12 +12,15 @@
 
             {% if user.is_authenticated %}
                 Hola, {{ user.username }} |
+
                 <form action="{% url 'logout' %}" method="post" style="display:inline;">
                     {% csrf_token %}
                     <button type="submit" style="background:none;border:none;color:blue;cursor:pointer;padding:0;">
                         Cerrar sesión
                     </button>
                 </form>
+
+                | <a href="{% url 'mis_operaciones' %}">Mis operaciones</a>
             {% else %}
                 <a href="{% url 'login' %}">Iniciar sesión</a>
             {% endif %}
