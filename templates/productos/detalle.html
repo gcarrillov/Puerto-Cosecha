@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+
+{% block title %}{{ producto.nombre }}{% endblock %}
+
+{% block content %}
+<h2>{{ producto.nombre }}</h2>
+
+<p><strong>Productor:</strong> {{ producto.productor.user.username }}</p>
+<p><strong>Descripción:</strong> {{ producto.descripcion }}</p>
+<p><strong>Precio unitario:</strong> {{ producto.precio_unitario }}</p>
+<p><strong>Stock:</strong> {{ producto.stock }}</p>
+<p><strong>País de origen:</strong> {{ producto.pais_origen }}</p>
+<p><strong>Fecha de registro:</strong> {{ producto.fecha_registro }}</p>
+
+<a href="{% url 'lista_productos' %}">← Volver al listado</a>
+{% endblock %}

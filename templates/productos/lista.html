@@ -8,7 +8,10 @@
 <ul>
     {% for p in productos %}
         <li>
-            <strong>{{ p.nombre }}</strong> - {{ p.pais_origen }} -
+            <a href="{% url 'detalle_producto' p.pk %}">
+                <strong>{{ p.nombre }}</strong>
+            </a>
+            - {{ p.pais_origen }} -
             Stock: {{ p.stock }} - Precio: {{ p.precio_unitario }}
         </li>
     {% empty %}
