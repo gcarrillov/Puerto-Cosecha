@@ -104,6 +104,10 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
+# para la autenticación redirecciones:
+LOGIN_URL = 'login'                 # url login
+LOGIN_REDIRECT_URL = 'lista_productos'   #despues de loguearse
+LOGOUT_REDIRECT_URL = 'lista_productos'  #despues de cerrar sesion
 
 # Internationalization
 # https://docs.djangoproject.com/en/5.2/topics/i18n/
