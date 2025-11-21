@@ -8,8 +8,14 @@
     <header>
         <h1>Plataforma AGRFSI</h1>
         <nav>
-            <a href="/">Productos</a> |
-            <a href="/admin/">Admin</a>
+            <a href="{% url 'lista_productos' %}">Productos</a> |
+            {% if user.is_authenticated %}
+                Hola, {{ user.username }} |
+                <a href="{% url 'logout' %}">Cerrar sesión</a>
+            {% else %}
+                <a href="{% url 'login' %}">Iniciar sesión</a>
+            {% endif %}
+            | <a href="/admin/">Admin</a>
         </nav>
         <hr>
     </header>
