@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+
+{% block title %}Listado de productos{% endblock %}
+
+{% block content %}
+<h2>Productos disponibles</h2>
+
+<ul>
+    {% for p in productos %}
+        <li>
+            <strong>{{ p.nombre }}</strong> - {{ p.pais_origen }} -
+            Stock: {{ p.stock }} - Precio: {{ p.precio_unitario }}
+        </li>
+    {% empty %}
+        <li>No hay productos registrados.</li>
+    {% endfor %}
+</ul>
+{% endblock %}
