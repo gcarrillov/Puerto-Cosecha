@@ -5,11 +5,9 @@
 {% block content %}
 <h2>Productos disponibles</h2>
 
-<ul>
-    {% if user.is_authenticated and user.perfil.rol == 'productor' %}
-    <p><a href="{% url 'crear_producto' %}">Crear nuevo producto</a></p>
-    {% endif %}
+<p>DEBUG: Si ves este texto, la vista y el template están bien conectados.</p>
 
+<ul>
     {% for p in productos %}
         <li>
             <a href="{% url 'detalle_producto' p.pk %}">

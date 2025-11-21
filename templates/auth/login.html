@@ -8,6 +8,12 @@
 <form method="post">
     {% csrf_token %}
     {{ form.as_p }}
+
+    {# Esto permite que Django recuerde a qué URL querías ir antes del login #}
+    {% if next %}
+        <input type="hidden" name="next" value="{{ next }}">
+    {% endif %}
+
     <button type="submit">Entrar</button>
 </form>
 {% endblock %}
