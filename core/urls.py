@@ -17,6 +17,9 @@ urlpatterns = [
         auth_views.LogoutView.as_view(),   # se usa LOGOUT_REDIRECT_URL
         name='logout'
         ),
-    # app productos
+    # Productos
     path('', include('productos.urls')),
+
+    # Operaciones comerciales
+    path('operaciones/', include('operaciones.urls')),
 ]

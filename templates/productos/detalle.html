@@ -11,7 +11,22 @@
 <p><strong>Stock:</strong> {{ producto.stock }}</p>
 <p><strong>País de origen:</strong> {{ producto.pais_origen }}</p>
 
-{% if user.is_authenticated and user.perfil == producto.productor %}
+<hr>
+
+{% if user.is_authenticated and hasattr(user, 'perfil') and user.perfil.rol == 'empresa' %}
+    <p>
+        <a href="{% url 'crear_operacion' producto.pk %}">
+            Solicitar operación comercial
+        </a>
+    </p>
+{% elif not user.is_authenticated %}
+    <p>
+        Para solicitar una operación comercial, debes
+        <a href="{% url 'login' %}?next={% url 'detalle_producto' producto.pk %}">iniciar sesión</a>.
+    </p>
+{% endif %}
+
+{% if user.is_authenticated and hasattr(user, 'perfil') and user.perfil == producto.productor %}
     <p>
         <a href="{% url 'editar_producto' producto.pk %}">Editar este producto</a>
     </p>

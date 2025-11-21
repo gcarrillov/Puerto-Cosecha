@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+
+{% block title %}Mis operaciones{% endblock %}
+
+{% block content %}
+<h2>Mis operaciones comerciales</h2>
+
+{% if operaciones %}
+    <table border="1" cellpadding="5" cellspacing="0">
+        <tr>
+            <th>Fecha</th>
+            <th>Tipo</th>
+            <th>Producto</th>
+            <th>Cantidad</th>
+            <th>Incoterm</th>
+            <th>Estado</th>
+        </tr>
+        {% for op in operaciones %}
+            <tr>
+                <td>{{ op.fecha_creacion }}</td>
+                <td>{{ op.get_tipo_operacion_display }}</td>
+                <td>{{ op.producto.nombre }}</td>
+                <td>{{ op.cantidad }}</td>
+                <td>{{ op.incoterm }}</td>
+                <td>{{ op.get_estado_display }}</td>
+            </tr>
+        {% endfor %}
+    </table>
+{% else %}
+    <p>No tienes operaciones registradas.</p>
+{% endif %}
+
+{% endblock %}
