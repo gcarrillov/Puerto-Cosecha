@@ -10,7 +10,12 @@
 <p><strong>Precio unitario:</strong> {{ producto.precio_unitario }}</p>
 <p><strong>Stock:</strong> {{ producto.stock }}</p>
 <p><strong>País de origen:</strong> {{ producto.pais_origen }}</p>
-<p><strong>Fecha de registro:</strong> {{ producto.fecha_registro }}</p>
+
+{% if user.is_authenticated and user.perfil == producto.productor %}
+    <p>
+        <a href="{% url 'editar_producto' producto.pk %}">Editar este producto</a>
+    </p>
+{% endif %}
 
 <a href="{% url 'lista_productos' %}">← Volver al listado</a>
 {% endblock %}
