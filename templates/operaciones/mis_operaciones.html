@@ -14,6 +14,8 @@
             <th>Cantidad</th>
             <th>Incoterm</th>
             <th>Estado</th>
+            <th>Moneda</th>
+            <th>Precio total</th>
         </tr>
         {% for op in operaciones %}
             <tr>
@@ -23,11 +25,12 @@
                 <td>{{ op.cantidad }}</td>
                 <td>{{ op.incoterm }}</td>
                 <td>{{ op.get_estado_display }}</td>
+                <td>{{ op.moneda }}</td>
+                <td>{{ op.precio_total }}</td>
             </tr>
         {% endfor %}
     </table>
 {% else %}
     <p>No tienes operaciones registradas.</p>
 {% endif %}
-
 {% endblock %}

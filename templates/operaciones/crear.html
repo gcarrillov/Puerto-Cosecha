@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+
+{% block title %}Crear operación{% endblock %}
+
+{% block content %}
+<h2>Crear operación comercial</h2>
+
+<p><strong>Producto:</strong> {{ producto.nombre }} ({{ producto.pais_origen }})</p>
+
+<form method="post">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button type="submit">Crear operación</button>
+</form>
+
+<a href="{% url 'detalle_producto' producto.pk %}">← Volver al producto</a>
+{% endblock %}
