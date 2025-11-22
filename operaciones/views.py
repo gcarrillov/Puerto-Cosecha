@@ -8,6 +8,9 @@ from productos.models import Producto
 
 
 def es_empresa(user):
+    """
+    Helper para verificar si el usuario autenticado es empresa.
+    """
     return hasattr(user, 'perfil') and user.perfil.rol == 'empresa'
 
 
@@ -26,8 +29,12 @@ def crear_operacion(request, producto_id):
         form = OperacionForm(request.POST)
         if form.is_valid():
             operacion = form.save(commit=False)
-            operacion.empresa = request.user.perfil   # perfil de empresa
-            operacion.producto = producto
+            operacion.empresa = request.user.perfil      # perfil de empresa
+            operacion.producto = producto                # producto sobre el que se opera
+
+            # opcional: podrías calcular precio_total aquí si quisieras
+            # operacion.precio_total = operacion.cantidad * producto.precio_unitario
+
             operacion.save()
             return redirect('mis_operaciones')
     else:
@@ -48,5 +55,10 @@ def mis_operaciones(request):
     if not es_empresa(request.user):
         return HttpResponseForbidden("No tienes permiso para ver estas operaciones.")
 
-    operaciones = OperacionComercial.objects.filter(empresa=request.user.perfil).order_by('-fecha_creacion')
+    operaciones = (
+        OperacionComercial.objects
+        .filter(empresa=request.user.perfil)
+        .order_by('-fecha_creacion')
+    )
+
     return render(request, 'operaciones/mis_operaciones.html', {'operaciones': operaciones})

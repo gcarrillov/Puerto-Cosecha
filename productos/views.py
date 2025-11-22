@@ -1,7 +1,7 @@
 from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib.auth.decorators import login_required
 from django.http import HttpResponseForbidden
-
+from operaciones.models import OperacionComercial
 from .models import Producto
 from .forms import ProductoForm
 
@@ -15,11 +15,13 @@ def lista_productos(request):
 
 
 def detalle_producto(request, pk):
-    """
-    Detalle de un producto individual.
-    """
     producto = get_object_or_404(Producto, pk=pk)
-    return render(request, 'productos/detalle.html', {'producto': producto})
+    operaciones = OperacionComercial.objects.filter(producto=producto).prefetch_related('documentos')
+    context = {
+        'producto': producto,
+        'operaciones': operaciones,
+    }
+    return render(request, 'productos/detalle.html', context)
 
 
 def es_productor(user):

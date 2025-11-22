@@ -13,6 +13,46 @@
 
 <hr>
 
+<h3>Operaciones y documentos asociados</h3>
+
+{% if operaciones %}
+    <ul>
+        {% for op in operaciones %}
+            <li>
+                {{ op.get_tipo_operacion_display }} -
+                {{ op.empresa.user.username }} -
+                {{ op.fecha_creacion }}
+
+                {% with docs=op.documentos.all %}
+                    {% if docs %}
+                        <ul>
+                            {% for doc in docs %}
+                                <li>
+                                    {{ doc.get_tipo_display }} -
+                                    {% if doc.archivo %}
+                                        <a href="{{ doc.archivo.url }}" target="_blank">Ver documento</a>
+                                    {% else %}
+                                        (sin archivo)
+                                    {% endif %}
+                                    {% if doc.descripcion %}
+                                        - {{ doc.descripcion }}
+                                    {% endif %}
+                                </li>
+                            {% endfor %}
+                        </ul>
+                    {% else %}
+                        (Sin documentos)
+                    {% endif %}
+                {% endwith %}
+            </li>
+        {% endfor %}
+    </ul>
+{% else %}
+    <p>No hay operaciones registradas para este producto.</p>
+{% endif %}
+
+<hr>
+
 {# Si es empresa logueada, puede solicitar operación #}
 {% if user.is_authenticated and user.perfil.rol == 'empresa' %}
     <p>
