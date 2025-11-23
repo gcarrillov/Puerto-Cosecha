@@ -1,27 +1,29 @@
+{% extends "base.html" %}
+{% block content %}
 <h2>Reporte Completo de Operaciones</h2>
 
-<form method="get">
-    <label for="estado">Estado:</label>
-    <select name="estado" id="estado">
+<form method="get" class="mb-3">
+    <label>Producto:</label>
+    <select name="producto">
         <option value="">Todos</option>
-        {% for e in estados %}
-            <option value="{{ e }}" {% if e == estado_seleccionado %}selected{% endif %}>{{ e }}</option>
+        {% for op in operaciones %}
+            <option value="{{ op.producto.id }}" {% if filtros.producto == op.producto.id|stringformat:"s" %}selected{% endif %}>{{ op.producto.nombre }}</option>
         {% endfor %}
     </select>
 
-    <label for="pais">País:</label>
-    <select name="pais" id="pais">
+    <label>Estado:</label>
+    <select name="estado">
         <option value="">Todos</option>
-        {% for p in paises %}
-            <option value="{{ p }}" {% if p == pais_seleccionado %}selected{% endif %}>{{ p }}</option>
+        {% for est, label in operaciones.model.ESTADOS %}
+            <option value="{{ est }}" {% if filtros.estado == est %}selected{% endif %}>{{ label }}</option>
         {% endfor %}
     </select>
 
-    <label for="producto">Producto:</label>
-    <select name="producto" id="producto">
+    <label>Pais:</label>
+    <select name="pais">
         <option value="">Todos</option>
-        {% for id, nombre in productos %}
-            <option value="{{ id }}" {% if id|stringformat:"s" == producto_seleccionado %}selected{% endif %}>{{ nombre }}</option>
+        {% for pa, label in operaciones.model.PAISES %}
+            <option value="{{ pa }}" {% if filtros.pais == pa %}selected{% endif %}>{{ label }}</option>
         {% endfor %}
     </select>
 
@@ -31,26 +33,63 @@
 <table border="1" cellpadding="5" cellspacing="0">
     <thead>
         <tr>
+            <th>ID</th>
             <th>Producto</th>
+            <th>Productor</th>
+            <th>Empresa</th>
+            <th>Cantidad</th>
+            <th>Precio Unitario</th>
+            <th>Precio Total</th>
             <th>Estado</th>
-            <th>País de destino</th>
-            <th>Total Cantidad</th>
-            <th>Total Operaciones</th>
+            <th>País Destino</th>
+            <th>Documentos</th>
+            <th>Fecha Creación</th>
         </tr>
     </thead>
     <tbody>
-        {% for r in resumen %}
-            <tr>
-                <td>{{ r.producto__nombre }}</td>
-                <td>{{ r.estado }}</td>
-                <td>{{ r.pais_destino }}</td>
-                <td>{{ r.total_cantidad }}</td>
-                <td>{{ r.total_operaciones }}</td>
-            </tr>
+        {% for op in operaciones %}
+        <tr>
+            <td>{{ op.id }}</td>
+            <td>{{ op.producto.nombre }}</td>
+            <td>{{ op.productor.username }}</td>
+            <td>{{ op.empresa.username }}</td>
+            <td>{{ op.cantidad }}</td>
+            <td>{{ op.precio_unitario }}</td>
+            <td>{{ op.precio_total }}</td>
+            <td>{{ op.get_estado_display }}</td>
+            <td>{{ op.pais_destino }}</td>
+            <td>
+                {% for doc in op.documentos.all %}
+                    {{ doc.tipo }}<br>
+                {% empty %}
+                    -
+                {% endfor %}
+            </td>
+            <td>{{ op.fecha_creacion }}</td>
+        </tr>
         {% empty %}
-            <tr>
-                <td colspan="5">No hay operaciones que coincidan con los filtros.</td>
-            </tr>
+        <tr>
+            <td colspan="11">No hay operaciones.</td>
+        </tr>
         {% endfor %}
     </tbody>
 </table>
+
+<h3>Totales por Producto</h3>
+<table border="1" cellpadding="5" cellspacing="0">
+    <thead>
+        <tr>
+            <th>Producto</th>
+            <th>Total Cantidad</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for t in total_por_producto %}
+        <tr>
+            <td>{{ t.producto__nombre }}</td>
+            <td>{{ t.total_cantidad }}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endblock %}
