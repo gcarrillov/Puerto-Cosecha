@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+
+{% block title %}Reporte por estado{% endblock %}
+
+{% block content %}
+<h2>Operaciones por estado</h2>
+
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th>Estado</th>
+            <th>Total</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for item in operaciones %}
+        <tr>
+            <td>{{ item.estado }}</td>
+            <td>{{ item.total }}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endblock %}
