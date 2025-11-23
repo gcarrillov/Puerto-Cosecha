@@ -7,7 +7,8 @@ from .views import (
     cambiar_estado,
     reporte_por_estado,
     reporte_por_pais,
-    reporte_productos
+    reporte_productos,
+    reporte_completo
 )
 
 urlpatterns = [
@@ -26,4 +27,5 @@ urlpatterns = [
     path('reportes/estado/', reporte_por_estado, name='reporte_por_estado'),
     path('reportes/pais/', reporte_por_pais, name='reporte_por_pais'),
     path('reportes/productos/', reporte_productos, name='reporte_productos'),
+    path('reportes/completo/', reporte_completo, name='reporte_completo'),
 ]

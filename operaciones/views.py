@@ -255,3 +255,45 @@ def reporte_productos(request):
         'producto_seleccionado': int(producto_seleccionado) if producto_seleccionado else None
     }
     return render(request, 'reportes/productos.html', context)
+
+@login_required
+def reporte_completo(request):
+    """
+    Reporte de operaciones con filtros combinados por estado, país y producto.
+    """
+    # Obtener filtros desde GET
+    estado_filtrado = request.GET.get('estado', '')
+    pais_filtrado = request.GET.get('pais', '')
+    producto_filtrado = request.GET.get('producto', '')
+
+    # Consulta base
+    operaciones = OperacionComercial.objects.all()
+
+    if estado_filtrado:
+        operaciones = operaciones.filter(estado=estado_filtrado)
+    if pais_filtrado:
+        operaciones = operaciones.filter(pais_destino=pais_filtrado)
+    if producto_filtrado:
+        operaciones = operaciones.filter(producto__id=producto_filtrado)
+
+    # Datos agregados para mostrar
+    resumen = (
+        operaciones.values('producto__nombre', 'estado', 'pais_destino')
+        .annotate(total_cantidad=Sum('cantidad'), total_operaciones=Count('id'))
+        .order_by('producto__nombre', 'estado', 'pais_destino')
+    )
+
+    # Listas para los filtros
+    estados = [e[0] for e in OperacionComercial.ESTADOS]
+    paises = OperacionComercial.objects.values_list('pais_destino', flat=True).distinct()
+    productos = OperacionComercial.objects.values_list('producto__id', 'producto__nombre').distinct()
+
+    return render(request, 'reportes/completo.html', {
+        'resumen': resumen,
+        'estados': estados,
+        'paises': paises,
+        'productos': productos,
+        'estado_seleccionado': estado_filtrado,
+        'pais_seleccionado': pais_filtrado,
+        'producto_seleccionado': producto_filtrado,
+    })
