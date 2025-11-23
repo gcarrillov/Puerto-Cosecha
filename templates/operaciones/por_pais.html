@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+
+{% block title %}Reporte por país{% endblock %}
+
+{% block content %}
+<h2>Operaciones por país de destino</h2>
+
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th>País</th>
+            <th>Total operaciones</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for item in operaciones %}
+        <tr>
+            <td>{{ item.pais_destino }}</td>
+            <td>{{ item.total }}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+{% endblock %}
