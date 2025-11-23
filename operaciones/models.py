@@ -4,6 +4,12 @@ from usuarios.models import Usuario
 
 
 class OperacionComercial(models.Model):
+
+    TIPOS = (
+        ('IMP', 'Importación'),
+        ('EXP', 'Exportación'),
+    )
+
     ESTADOS = (
         ('pendiente', 'Pendiente'),
         ('en_proceso', 'En proceso'),
@@ -12,30 +18,47 @@ class OperacionComercial(models.Model):
         ('cancelado', 'Cancelado'),
     )
 
+    # --- TIPO ---
+    tipo_operacion = models.CharField(max_length=3, choices=TIPOS)
+
+    # --- ACTORES ---
     empresa = models.ForeignKey(
         Usuario,
         on_delete=models.CASCADE,
         related_name='operaciones_empresa'
     )
+
     productor = models.ForeignKey(
         Usuario,
         on_delete=models.CASCADE,
         related_name='operaciones_productor'
     )
+
     producto = models.ForeignKey(Producto, on_delete=models.CASCADE)
 
-    cantidad = models.IntegerField()
+    # --- CANTIDAD / PRECIOS ---
+    cantidad = models.PositiveIntegerField()
     precio_unitario = models.DecimalField(max_digits=10, decimal_places=2, editable=False)
     precio_total = models.DecimalField(max_digits=12, decimal_places=2, editable=False)
 
+    # --- LOGÍSTICA ---
+    incoterm = models.CharField(max_length=10)
+    pais_destino = models.CharField(max_length=120)
+    puerto_origen = models.CharField(max_length=120, blank=True, null=True)
+    puerto_destino = models.CharField(max_length=120, blank=True, null=True)
+
+    # --- ECONOMÍA ---
+    moneda = models.CharField(max_length=10, default="USD")
+
+    # --- ESTADO ---
     estado = models.CharField(max_length=20, choices=ESTADOS, default='pendiente')
+
     fecha_creacion = models.DateTimeField(auto_now_add=True)
 
     # =============================
     # VALIDACIONES + CÁLCULO
     # =============================
     def clean(self):
-        """Validaciones de stock antes de guardar la operación."""
         if self.cantidad <= 0:
             raise ValueError("La cantidad debe ser mayor a 0.")
 
@@ -43,20 +66,17 @@ class OperacionComercial(models.Model):
             raise ValueError("Cantidad solicitada excede el stock disponible.")
 
     def calcular_precio_total(self):
+        # Asumimos que Producto tiene precio_unitario
         self.precio_unitario = self.producto.precio_unitario
         self.precio_total = self.cantidad * self.precio_unitario
 
     def save(self, *args, **kwargs):
-        # Validaciones de stock
         self.clean()
-
-        # Precio total automático
-        self.calcular_precio_total()
-
+        self.calcular_precicio_total()
         super().save(*args, **kwargs)
 
     def __str__(self):
-        return f"Operación {self.id} - {self.producto.nombre} ({self.estado})"
+        return f"{self.get_tipo_operacion_display()} - {self.producto.nombre} ({self.estado})"
 
 
 # ====================================

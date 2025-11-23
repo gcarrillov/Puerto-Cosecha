@@ -1,5 +1,5 @@
 from django import forms
-from .models import OperacionComercial
+from .models import OperacionComercial, DocumentoAduanero
 
 
 class OperacionForm(forms.ModelForm):
@@ -67,3 +67,34 @@ class OperacionForm(forms.ModelForm):
             raise forms.ValidationError("El puerto de origen y destino no pueden ser iguales.")
 
         return cleaned_data
+
+class DocumentoAduaneroForm(forms.ModelForm):
+
+    class Meta:
+        model = DocumentoAduanero
+        fields = ['tipo', 'archivo', 'descripcion']
+
+        widgets = {
+            'tipo': forms.Select(attrs={
+                'class': 'form-select'
+            }),
+            'archivo': forms.ClearableFileInput(attrs={
+                'class': 'form-control'
+            }),
+            'descripcion': forms.Textarea(attrs={
+                'class': 'form-control',
+                'placeholder': 'Descripción opcional del documento',
+                'rows': 3,
+            })
+        }
+
+    # Validación opcional
+    def clean_archivo(self):
+        archivo = self.cleaned_data.get('archivo')
+
+        # Validar tamaño máximo (5 MB por ejemplo)
+        max_size = 5 * 1024 * 1024
+        if archivo.size > max_size:
+            raise forms.ValidationError("El archivo no debe superar 5 MB.")
+
+        return archivo
