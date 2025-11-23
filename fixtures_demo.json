@@ -1,0 +1,73 @@
+[
+  {
+    "model": "usuarios.usuario",
+    "pk": 1,
+    "fields": {
+      "username": "productor_demo",
+      "rol": "productor",
+      "password": "pbkdf2_sha256$260000$samplehash$samplehashvalue"
+    }
+  },
+  {
+    "model": "usuarios.usuario",
+    "pk": 2,
+    "fields": {
+      "username": "empresa_demo",
+      "rol": "empresa",
+      "password": "pbkdf2_sha256$260000$samplehash$samplehashvalue"
+    }
+  },
+  {
+    "model": "productos.producto",
+    "pk": 1,
+    "fields": {
+      "productor": 1,
+      "nombre": "Tomate",
+      "descripcion": "Tomate rojo fresco",
+      "precio_unitario": "1.50",
+      "stock": 100,
+      "pais_origen": "Perú",
+      "unidad": "kg",
+      "categoria": "Hortalizas"
+    }
+  },
+  {
+    "model": "productos.producto",
+    "pk": 2,
+    "fields": {
+      "productor": 1,
+      "nombre": "Lechuga",
+      "descripcion": "Lechuga verde fresca",
+      "precio_unitario": "0.80",
+      "stock": 200,
+      "pais_origen": "Perú",
+      "unidad": "kg",
+      "categoria": "Hortalizas"
+    }
+  },
+  {
+    "model": "operaciones.operacioncomercial",
+    "pk": 1,
+    "fields": {
+      "empresa": 2,
+      "productor": 1,
+      "producto": 1,
+      "cantidad": 50,
+      "precio_unitario": "1.50",
+      "precio_total": "75.00",
+      "estado": "pendiente",
+      "fecha_creacion": "2025-11-23T00:00:00Z"
+    }
+  },
+  {
+    "model": "operaciones.documentoaduanero",
+    "pk": 1,
+    "fields": {
+      "operacion": 1,
+      "tipo": "factura",
+      "archivo": "documentos_aduaneros/factura_demo.pdf",
+      "descripcion": "Factura de prueba",
+      "fecha_subida": "2025-11-23T00:00:00Z"
+    }
+  }
+]
