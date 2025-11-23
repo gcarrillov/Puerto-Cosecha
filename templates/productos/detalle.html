@@ -1,78 +1,109 @@
-{% extends "base.html" %}
+{% extends 'base.html' %}
 
 {% block title %}{{ producto.nombre }}{% endblock %}
 
 {% block content %}
-<h2>{{ producto.nombre }}</h2>
+<div class="container py-5">
+    <!-- Breadcrumb -->
+    <nav aria-label="breadcrumb" class="mb-4">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{% url 'home' %}">Inicio</a></li>
+            <li class="breadcrumb-item"><a href="{% url 'lista_productos' %}">Catálogo</a></li>
+            <li class="breadcrumb-item active">{{ producto.nombre }}</li>
+        </ol>
+    </nav>
 
-<p><strong>Productor:</strong> {{ producto.productor.user.username }}</p>
-<p><strong>Descripción:</strong> {{ producto.descripcion }}</p>
-<p><strong>Precio unitario:</strong> {{ producto.precio_unitario }}</p>
-<p><strong>Stock:</strong> {{ producto.stock }}</p>
-<p><strong>País de origen:</strong> {{ producto.pais_origen }}</p>
+    <div class="row">
+        <!-- COLUMNA IZQUIERDA: IMAGEN -->
+        <div class="col-md-6 mb-4">
+            <div class="card border-0 shadow-sm overflow-hidden">
+                {% if producto.imagen %}
+                    <img src="{{ producto.imagen.url }}" alt="{{ producto.nombre }}" class="img-fluid w-100" style="max-height: 500px; object-fit: cover;">
+                {% else %}
+                    <!-- Placeholder grande si no hay imagen -->
+                    <div class="bg-light d-flex align-items-center justify-content-center text-muted" style="height: 400px;">
+                        <div class="text-center">
+                            <i class="fa-solid fa-image fa-5x mb-3"></i>
+                            <h5>Imagen no disponible</h5>
+                        </div>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
 
-<hr>
-
-<h3>Operaciones y documentos asociados</h3>
-
-{% if operaciones %}
-    <ul>
-        {% for op in operaciones %}
-            <li>
-                {{ op.get_tipo_operacion_display }} -
-                {{ op.empresa.user.username }} -
-                {{ op.fecha_creacion }}
-
-                {% with docs=op.documentos.all %}
-                    {% if docs %}
-                        <ul>
-                            {% for doc in docs %}
-                                <li>
-                                    {{ doc.get_tipo_display }} -
-                                    {% if doc.archivo %}
-                                        <a href="{{ doc.archivo.url }}" target="_blank">Ver documento</a>
-                                    {% else %}
-                                        (sin archivo)
-                                    {% endif %}
-                                    {% if doc.descripcion %}
-                                        - {{ doc.descripcion }}
-                                    {% endif %}
-                                </li>
-                            {% endfor %}
-                        </ul>
+        <!-- COLUMNA DERECHA: INFORMACIÓN -->
+        <div class="col-md-6">
+            <div class="ps-md-4">
+                <div class="d-flex align-items-center gap-2 mb-2">
+                    <span class="badge bg-success">{{ producto.get_categoria_display }}</span>
+                    {% if producto.es_perecible %}
+                        <span class="badge bg-danger">Perecible</span>
                     {% else %}
-                        (Sin documentos)
+                        <span class="badge bg-secondary">No perecible</span>
                     {% endif %}
-                {% endwith %}
-            </li>
-        {% endfor %}
-    </ul>
-{% else %}
-    <p>No hay operaciones registradas para este producto.</p>
-{% endif %}
+                </div>
 
-<hr>
+                <h1 class="fw-bold mb-1">{{ producto.nombre }}</h1>
+                <p class="text-muted mb-3">
+                    <i class="fa-solid fa-user-circle"></i> Productor: <strong>{{ producto.productor.user.username }}</strong> &nbsp;|&nbsp; 
+                    <i class="fa-solid fa-globe"></i> Origen: <strong>{{ producto.pais_origen }}</strong>
+                </p>
 
-{# Si es empresa logueada, puede solicitar operación #}
-{% if user.is_authenticated and user.perfil.rol == 'empresa' %}
-    <p>
-        <a href="{% url 'crear_operacion' producto.pk %}">
-            Solicitar operación comercial
-        </a>
-    </p>
-{% elif not user.is_authenticated %}
-    <p>
-        Para solicitar una operación comercial, debes
-        <a href="{% url 'login' %}?next={% url 'detalle_producto' producto.pk %}">iniciar sesión</a>.
-    </p>
-{% endif %}
+                <div class="bg-light p-3 rounded mb-4 border-start border-success border-5">
+                    <h2 class="text-success fw-bold m-0">
+                        S/{{ producto.precio_unitario }}
+                        <small class="fs-6 text-dark fw-normal"> Soles por {{ producto.get_unidad_medida_display }}</small>
+                    </h2>
+                    <p class="mt-2 mb-0 text-muted"><strong>Stock Disponible:</strong> {{ producto.stock }} {{ producto.get_unidad_medida_display }}s</p>
+                </div>
 
-{# Si es el productor dueño del producto, puede editarlo #}
-{% if user.is_authenticated and user.perfil == producto.productor %}
-    <p>
-        <a href="{% url 'editar_producto' producto.pk %}">Editar este producto</a>
-    </p>
-{% endif %}
+                <!-- TABS -->
+                <ul class="nav nav-tabs mb-3" id="infoTab" role="tablist">
+                    <li class="nav-item">
+                        <button class="nav-link active" data-bs-toggle="tab" data-bs-target="#desc">Descripción</button>
+                    </li>
+                    <li class="nav-item">
+                        <button class="nav-link" data-bs-toggle="tab" data-bs-target="#cert">Certificaciones</button>
+                    </li>
+                </ul>
+                
+                <div class="tab-content mb-4" id="infoTabContent">
+                    <div class="tab-pane fade show active" id="desc">
+                        <p class="text-secondary">{{ producto.descripcion }}</p>
+                    </div>
+                    <div class="tab-pane fade" id="cert">
+                        {% if producto.certificaciones %}
+                            <div class="d-flex align-items-start">
+                                <i class="fa-solid fa-certificate text-warning fs-4 me-2"></i>
+                                <p>{{ producto.certificaciones }}</p>
+                            </div>
+                        {% else %}
+                            <p class="text-muted fst-italic">No se han especificado certificaciones.</p>
+                        {% endif %}
+                    </div>
+                </div>
 
-<a href="{% url 'lista_productos' %}">← Volver al listado</a>
+                <!-- ACCIONES -->
+                <div class="d-grid gap-2">
+                    {% if user.is_authenticated %}
+                        {% if user.perfil.rol == 'empresa' %}
+                            <a href="{% url 'crear_operacion' producto.id %}" class="btn btn-primary-custom btn-lg shadow-sm">
+                                <i class="fa-solid fa-file-contract me-2"></i> Iniciar Operación
+                            </a>
+                        {% else %}
+                            <button class="btn btn-secondary btn-lg" disabled>
+                                Disponibles para Empresas
+                            </button>
+                        {% endif %}
+                    {% else %}
+                        <a href="{% url 'login' %}" class="btn btn-outline-primary btn-lg">
+                            Inicia Sesión para Negociar
+                        </a>
+                    {% endif %}
+                </div>
+
+            </div>
+        </div>
+    </div>
+</div>
 {% endblock %}
