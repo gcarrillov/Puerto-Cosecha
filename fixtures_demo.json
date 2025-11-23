@@ -1,62 +1,91 @@
 [
   {
-    "model": "usuarios.usuario",
+    "model": "usuarios.user",
     "pk": 1,
-    "fields": {
-      "username": "productor_demo",
-      "rol": "productor",
-      "password": "pbkdf2_sha256$260000$samplehash$samplehashvalue"
-    }
-  },
-  {
-    "model": "usuarios.usuario",
-    "pk": 2,
     "fields": {
       "username": "empresa_demo",
+      "password": "password",
+      "is_superuser": false,
+      "is_staff": false,
+      "is_active": true
+    }
+  },
+  {
+    "model": "usuarios.usuario",
+    "pk": 1,
+    "fields": {
+      "user": 1,
       "rol": "empresa",
-      "password": "pbkdf2_sha256$260000$samplehash$samplehashvalue"
+      "telefono": "123456789",
+      "direccion": "Calle Demo 123"
+    }
+  },
+  {
+    "model": "usuarios.user",
+    "pk": 2,
+    "fields": {
+      "username": "productor_demo",
+      "password": "password",
+      "is_superuser": false,
+      "is_staff": false,
+      "is_active": true
+    }
+  },
+  {
+    "model": "usuarios.usuario",
+    "pk": 2,
+    "fields": {
+      "user": 2,
+      "rol": "productor",
+      "telefono": "987654321",
+      "direccion": "Av. Demo 456"
+    }
+  },
+  {
+    "model": "usuarios.productor",
+    "pk": 1,
+    "fields": {
+      "usuario": 2,
+      "tipo_productor": "mediano",
+      "region": "Lima",
+      "certificaciones": "Orgánico, Fair Trade",
+      "capacidad_produccion_anual_ton": "50.00"
     }
   },
   {
     "model": "productos.producto",
     "pk": 1,
     "fields": {
-      "productor": 1,
-      "nombre": "Tomate",
-      "descripcion": "Tomate rojo fresco",
-      "precio_unitario": "1.50",
+      "productor": 2,
+      "nombre": "Mango Kent",
+      "descripcion": "Mango de exportación de calidad premium",
+      "precio_unitario": "2.50",
       "stock": 100,
       "pais_origen": "Perú",
-      "unidad": "kg",
-      "categoria": "Hortalizas"
-    }
-  },
-  {
-    "model": "productos.producto",
-    "pk": 2,
-    "fields": {
-      "productor": 1,
-      "nombre": "Lechuga",
-      "descripcion": "Lechuga verde fresca",
-      "precio_unitario": "0.80",
-      "stock": 200,
-      "pais_origen": "Perú",
-      "unidad": "kg",
-      "categoria": "Hortalizas"
+      "unidad_medida": "kg",
+      "categoria": "fruta",
+      "certificaciones": "Orgánico",
+      "es_perecible": true
     }
   },
   {
     "model": "operaciones.operacioncomercial",
     "pk": 1,
     "fields": {
-      "empresa": 2,
-      "productor": 1,
+      "tipo_operacion": "EXP",
+      "empresa": 1,
+      "productor": 2,
       "producto": 1,
-      "cantidad": 50,
-      "precio_unitario": "1.50",
-      "precio_total": "75.00",
+      "cantidad": 20,
+      "precio_unitario": "2.50",
+      "precio_total": "50.00",
+      "incoterm": "FOB",
+      "pais_destino": "EEUU",
+      "puerto_origen": "Callao",
+      "puerto_destino": "Miami",
+      "moneda": "USD",
       "estado": "pendiente",
-      "fecha_creacion": "2025-11-23T00:00:00Z"
+      "fecha_creacion": "2025-11-23T12:00:00Z"
     }
   },
   {
@@ -66,8 +95,8 @@
       "operacion": 1,
       "tipo": "factura",
       "archivo": "documentos_aduaneros/factura_demo.pdf",
-      "descripcion": "Factura de prueba",
-      "fecha_subida": "2025-11-23T00:00:00Z"
+      "descripcion": "Factura de exportación de prueba",
+      "fecha_subida": "2025-11-23T12:10:00Z"
     }
   }
 ]
