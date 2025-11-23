@@ -2,6 +2,7 @@ from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib.auth.decorators import login_required
 from django.http import HttpResponseForbidden
 from django.db import models
+from django.db.models import Sum, Count
 
 from .models import OperacionComercial, DocumentoAduanero
 from .forms import OperacionForm, DocumentoAduaneroForm
@@ -166,15 +167,28 @@ def cambiar_estado(request, operacion_id, nuevo_estado):
 def reporte_por_estado(request):
     """
     Genera un reporte agrupado por estado de operación.
+    Permite filtrar por estado si se recibe un GET con 'estado'.
     """
-    operaciones = (
-        OperacionComercial.objects
-        .values('estado')
+    estado_filtrado = request.GET.get('estado', None)
+
+    operaciones = OperacionComercial.objects.all()
+    if estado_filtrado:
+        operaciones = operaciones.filter(estado=estado_filtrado)
+
+    # Agrupamos y contamos
+    resumen = (
+        operaciones.values('estado')
         .annotate(total=models.Count('id'))
         .order_by('estado')
     )
 
-    return render(request, 'reportes/por_estado.html', {'operaciones': operaciones})
+    estados = [e[0] for e in OperacionComercial.ESTADOS]
+
+    return render(request, 'reportes/por_estado.html', {
+        'resumen': resumen,
+        'estados': estados,
+        'estado_seleccionado': estado_filtrado,
+    })
 
 
 # -----------------------------------------------------------
@@ -203,13 +217,29 @@ def reporte_por_pais(request):
 @login_required
 def reporte_productos(request):
     """
-    Reporte de productos más operados (suma de cantidades).
+    Reporte de operaciones filtradas por producto.
     """
-    productos = (
-        OperacionComercial.objects
-        .values('producto__nombre')
-        .annotate(total=models.Sum('cantidad'))
-        .order_by('-total')
-    )
+    productos = Producto.objects.all()  # Para el dropdown
+    producto_seleccionado = request.GET.get('producto')  # ID del producto
 
-    return render(request, 'reportes/productos_populares.html', {'productos': productos})
+    if producto_seleccionado:
+        operaciones = (
+            OperacionComercial.objects
+            .filter(producto_id=producto_seleccionado)
+            .values('producto__nombre')
+            .annotate(total=Sum('cantidad'))
+        )
+    else:
+        operaciones = (
+            OperacionComercial.objects
+            .values('producto__nombre')
+            .annotate(total=Sum('cantidad'))
+            .order_by('-total')
+        )
+
+    context = {
+        'productos': productos,
+        'operaciones': operaciones,
+        'producto_seleccionado': int(producto_seleccionado) if producto_seleccionado else None
+    }
+    return render(request, 'reportes/productos.html', context)
