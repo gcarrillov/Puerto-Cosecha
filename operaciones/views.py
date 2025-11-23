@@ -199,15 +199,27 @@ def reporte_por_estado(request):
 def reporte_por_pais(request):
     """
     Reporte de operaciones agrupadas por país de destino.
+    Permite filtrar por país si se recibe un GET con 'pais'.
     """
-    operaciones = (
-        OperacionComercial.objects
-        .values('pais_destino')
+    pais_filtrado = request.GET.get('pais', None)
+
+    operaciones = OperacionComercial.objects.all()
+    if pais_filtrado:
+        operaciones = operaciones.filter(pais_destino=pais_filtrado)
+
+    resumen = (
+        operaciones.values('pais_destino')
         .annotate(total=models.Count('id'))
         .order_by('pais_destino')
     )
 
-    return render(request, 'reportes/por_pais.html', {'operaciones': operaciones})
+    paises = OperacionComercial.objects.values_list('pais_destino', flat=True).distinct()
+
+    return render(request, 'reportes/por_pais.html', {
+        'resumen': resumen,
+        'paises': paises,
+        'pais_seleccionado': pais_filtrado,
+    })
 
 
 # -----------------------------------------------------------
