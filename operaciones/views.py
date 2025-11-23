@@ -57,6 +57,7 @@ def crear_operacion(request, producto_id):
     })
 
 
+
 # -----------------------------------------------------------
 #  Listar mis operaciones
 # -----------------------------------------------------------
@@ -66,8 +67,6 @@ def mis_operaciones(request):
     """
     Lista las operaciones comerciales de la empresa logueada.
     """
-    if not es_empresa(request.user):
-        return HttpResponseForbidden("No tienes permiso para ver estas operaciones.")
 
     operaciones = (
         OperacionComercial.objects

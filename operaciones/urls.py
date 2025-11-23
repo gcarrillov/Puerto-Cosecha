@@ -12,12 +12,12 @@ from .views import (
 
 urlpatterns = [
 
-    # Crear operación (ya lo tenías)
+    # Crear operación
     path('crear/<int:producto_id>/', 
          crear_operacion, 
          name='crear_operacion'),
 
-    # Listar operaciones (ya lo tenías)
+    # Listar operaciones
     path('mias/', 
          mis_operaciones, 
          name='mis_operaciones'),
