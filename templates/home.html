@@ -1,0 +1,78 @@
+{% extends 'base.html' %}
+
+{% block title %}Inicio{% endblock %}
+
+{% block content %}
+<style>
+    .hero-section {
+        /* Fondo con imagen agrícola oscura para resaltar texto */
+        background: linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.6)), url('https://images.unsplash.com/photo-1495107334309-fcf20504a5ab?ixlib=rb-1.2.1&auto=format&fit=crop&w=1950&q=80');
+        background-size: cover;
+        background-position: center;
+        color: white;
+        padding: 120px 0;
+        text-align: center;
+    }
+    .feature-card {
+        padding: 2rem;
+        border-radius: 12px;
+        background: white;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+        height: 100%;
+        transition: transform 0.3s;
+    }
+    .feature-card:hover { transform: translateY(-5px); }
+    .icon-box {
+        font-size: 2.5rem;
+        color: #2E7D32;
+        margin-bottom: 1rem;
+    }
+</style>
+
+<!-- HERO HEADER -->
+<header class="hero-section">
+    <div class="container">
+        <h1 class="display-4 fw-bold mb-3">Conectando Productores con el Mundo</h1>
+        <p class="lead mb-4">La plataforma integral para la gestión, normativa y exportación agrícola.</p>
+        <div class="d-flex justify-content-center gap-3">
+            <a href="{% url 'lista_productos' %}" class="btn btn-success btn-lg px-4">Ver Catálogo</a>
+            {% if not user.is_authenticated %}
+                <a href="{% url 'login' %}" class="btn btn-outline-light btn-lg px-4">Ingresar</a>
+            {% endif %}
+        </div>
+    </div>
+</header>
+
+<!-- CARACTERÍSTICAS -->
+<section class="py-5">
+    <div class="container">
+        <div class="text-center mb-5">
+            <h2 class="fw-bold">¿Por qué usar Puerto Cosecha?</h2>
+            <p class="text-muted">Optimizamos la cadena de suministro agroexportadora</p>
+        </div>
+        <div class="row g-4">
+            <div class="col-md-4">
+                <div class="feature-card text-center">
+                    <div class="icon-box"><i class="fa-solid fa-globe"></i></div>
+                    <h4>Alcance Global</h4>
+                    <p class="text-muted">Publica tus productos y alcanza mercados internacionales con información clara de Incoterms.</p>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="feature-card text-center">
+                    <div class="icon-box"><i class="fa-solid fa-file-contract"></i></div>
+                    <h4>Gestión Documental</h4>
+                    <p class="text-muted">Administra facturas, packing lists y certificados fitosanitarios por operación.</p>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="feature-card text-center">
+                    <div class="icon-box"><i class="fa-solid fa-handshake"></i></div>
+                    <h4>Negociación Directa</h4>
+                    <p class="text-muted">Conecta empresas exportadoras con productores verificados sin intermediarios.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}
