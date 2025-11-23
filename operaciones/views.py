@@ -25,10 +25,6 @@ def es_empresa(user):
 
 @login_required
 def crear_operacion(request, producto_id):
-    """
-    Crear una operación comercial (importación/exportación) sobre un producto.
-    Solo para usuarios con rol 'empresa'.
-    """
     if not es_empresa(request.user):
         return HttpResponseForbidden("No tienes permiso para crear operaciones comerciales.")
 
@@ -38,23 +34,27 @@ def crear_operacion(request, producto_id):
         form = OperacionForm(request.POST)
         if form.is_valid():
             operacion = form.save(commit=False)
-            operacion.empresa = request.user.perfil
+
+            # Empresa que compra / importa / exporta
+            operacion.empresa = request.user.perfil  
+
+            # Producto seleccionado
             operacion.producto = producto
 
-            # Calculamos el precio total automáticamente
-            operacion.precio_total = operacion.cantidad * producto.precio_unitario
+            # Productor dueño del producto
+            operacion.productor = producto.productor
 
+            # El precio total se calcula dentro del modelo, en save()
             operacion.save()
             return redirect('mis_operaciones')
 
     else:
         form = OperacionForm()
 
-    context = {
+    return render(request, 'operaciones/crear.html', {
         'form': form,
         'producto': producto,
-    }
-    return render(request, 'operaciones/crear.html', context)
+    })
 
 
 # -----------------------------------------------------------
