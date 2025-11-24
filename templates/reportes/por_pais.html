@@ -1,0 +1,33 @@
+<h2>Reporte por País de Destino</h2>
+
+<form method="get">
+    <label for="pais">Filtrar por país:</label>
+    <select name="pais" id="pais">
+        <option value="">Todos</option>
+        {% for p in paises %}
+            <option value="{{ p }}" {% if p == pais_seleccionado %}selected{% endif %}>{{ p }}</option>
+        {% endfor %}
+    </select>
+    <button type="submit">Filtrar</button>
+</form>
+
+<table>
+    <thead>
+        <tr>
+            <th>País</th>
+            <th>Total de operaciones</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for o in resumen %}
+            <tr>
+                <td>{{ o.pais_destino }}</td>
+                <td>{{ o.total }}</td>
+            </tr>
+        {% empty %}
+            <tr>
+                <td colspan="2">No hay operaciones.</td>
+            </tr>
+        {% endfor %}
+    </tbody>
+</table>
