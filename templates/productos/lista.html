@@ -1,23 +1,114 @@
-{% extends "base.html" %}
+{% extends 'base.html' %}
 
-{% block title %}Listado de productos{% endblock %}
+{% block title %}Catálogo{% endblock %}
 
 {% block content %}
-<h2>Productos disponibles</h2>
+<style>
+    /* Estilos específicos para el Grid de Productos */
+    .product-card {
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+        border: none;
+        border-radius: 12px;
+        overflow: hidden; /* Para que la imagen respete el borde redondeado */
+    }
+    .product-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+    }
+    .product-img-wrapper {
+        height: 220px; /* Altura fija para uniformidad */
+        position: relative;
+        background-color: #f8f9fa;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    .product-img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover; /* Recorta la imagen para llenar el espacio sin deformarse */
+    }
+    .badge-category {
+        position: absolute;
+        top: 10px;
+        right: 10px;
+        background: rgba(255, 255, 255, 0.9);
+        color: #2E7D32;
+        font-weight: 600;
+        padding: 5px 12px;
+        border-radius: 20px;
+        font-size: 0.8rem;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    }
+</style>
 
-<p>DEBUG: Si ves este texto, la vista y el template están bien conectados.</p>
+<div class="container py-5">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2 class="fw-bold mb-0">Catálogo de Productos</h2>
+            <p class="text-muted">Lo mejor del campo peruano para el mundo</p>
+        </div>
+        
+        {% if user.is_authenticated and user.perfil.rol == 'productor' %}
+            <a href="#" class="btn btn-success"><i class="fa-solid fa-plus"></i> Publicar Producto</a>
+        {% endif %}
+    </div>
 
-<ul>
-    {% for p in productos %}
-        <li>
-            <a href="{% url 'detalle_producto' p.pk %}">
-                <strong>{{ p.nombre }}</strong>
-            </a>
-            - {{ p.pais_origen }} -
-            Stock: {{ p.stock }} - Precio: {{ p.precio_unitario }}
-        </li>
-    {% empty %}
-        <li>No hay productos registrados.</li>
-    {% endfor %}
-</ul>
+    <!-- Grid de Tarjetas -->
+    <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
+        {% for producto in productos %}
+        <div class="col">
+            <div class="card h-100 product-card shadow-sm">
+                
+                <!-- Contenedor de Imagen -->
+                <div class="product-img-wrapper">
+                    <span class="badge-category">{{ producto.get_categoria_display }}</span>
+                    
+                    {% if producto.imagen %}
+                        <img src="{{ producto.imagen.url }}" alt="{{ producto.nombre }}" class="product-img">
+                    {% else %}
+                        <!-- Imagen por defecto si el producto no tiene foto -->
+                        <div class="text-center text-muted">
+                            <i class="fa-solid fa-carrot fa-3x mb-2"></i>
+                            <p class="small m-0">Sin imagen</p>
+                        </div>
+                    {% endif %}
+                </div>
+                
+                <div class="card-body d-flex flex-column">
+                    <div class="d-flex justify-content-between align-items-start mb-2">
+                        <small class="text-muted"><i class="fa-solid fa-location-dot text-danger"></i> {{ producto.pais_origen }}</small>
+                        {% if producto.es_perecible %}
+                             <span class="badge bg-warning text-dark" style="font-size: 0.65rem;">Perecible</span>
+                        {% endif %}
+                    </div>
+                    
+                    <h5 class="card-title fw-bold text-dark mb-1">{{ producto.nombre }}</h5>
+                    <p class="card-text text-muted small flex-grow-1">
+                        {{ producto.descripcion|truncatechars:80 }}
+                    </p>
+                    
+                    <div class="mt-3 pt-3 border-top d-flex justify-content-between align-items-center">
+                        <div>
+                            <span class="fw-bold text-success fs-5">S/{{ producto.precio_unitario }}</span>
+                            <span class="text-muted small">/ {{ producto.get_unidad_medida_display }}</span>
+                        </div>
+                        <a href="{% url 'detalle_producto' producto.pk %}" class="btn btn-outline-success btn-sm stretched-link">
+                            Ver Detalle
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% empty %}
+        <div class="col-12 text-center py-5">
+            <div class="alert alert-light" role="alert">
+                <i class="fa-solid fa-basket-shopping fa-2x mb-3 text-muted"></i>
+                <h4>No se encontraron productos.</h4>
+                <p class="text-muted">Vuelve pronto para ver nuevas ofertas.</p>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
 {% endblock %}
