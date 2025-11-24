@@ -1,0 +1,95 @@
+{% extends "base.html" %}
+{% block content %}
+<h2>Reporte Completo de Operaciones</h2>
+
+<form method="get" class="mb-3">
+    <label>Producto:</label>
+    <select name="producto">
+        <option value="">Todos</option>
+        {% for op in operaciones %}
+            <option value="{{ op.producto.id }}" {% if filtros.producto == op.producto.id|stringformat:"s" %}selected{% endif %}>{{ op.producto.nombre }}</option>
+        {% endfor %}
+    </select>
+
+    <label>Estado:</label>
+    <select name="estado">
+        <option value="">Todos</option>
+        {% for est, label in operaciones.model.ESTADOS %}
+            <option value="{{ est }}" {% if filtros.estado == est %}selected{% endif %}>{{ label }}</option>
+        {% endfor %}
+    </select>
+
+    <label>Pais:</label>
+    <select name="pais">
+        <option value="">Todos</option>
+        {% for pa, label in operaciones.model.PAISES %}
+            <option value="{{ pa }}" {% if filtros.pais == pa %}selected{% endif %}>{{ label }}</option>
+        {% endfor %}
+    </select>
+
+    <button type="submit">Filtrar</button>
+</form>
+
+<table border="1" cellpadding="5" cellspacing="0">
+    <thead>
+        <tr>
+            <th>ID</th>
+            <th>Producto</th>
+            <th>Productor</th>
+            <th>Empresa</th>
+            <th>Cantidad</th>
+            <th>Precio Unitario</th>
+            <th>Precio Total</th>
+            <th>Estado</th>
+            <th>País Destino</th>
+            <th>Documentos</th>
+            <th>Fecha Creación</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for op in operaciones %}
+        <tr>
+            <td>{{ op.id }}</td>
+            <td>{{ op.producto.nombre }}</td>
+            <td>{{ op.productor.username }}</td>
+            <td>{{ op.empresa.username }}</td>
+            <td>{{ op.cantidad }}</td>
+            <td>{{ op.precio_unitario }}</td>
+            <td>{{ op.precio_total }}</td>
+            <td>{{ op.get_estado_display }}</td>
+            <td>{{ op.pais_destino }}</td>
+            <td>
+                {% for doc in op.documentos.all %}
+                    {{ doc.tipo }}<br>
+                {% empty %}
+                    -
+                {% endfor %}
+            </td>
+            <td>{{ op.fecha_creacion }}</td>
+        </tr>
+        {% empty %}
+        <tr>
+            <td colspan="11">No hay operaciones.</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+<h3>Totales por Producto</h3>
+<table border="1" cellpadding="5" cellspacing="0">
+    <thead>
+        <tr>
+            <th>Producto</th>
+            <th>Total Cantidad</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for t in total_por_producto %}
+        <tr>
+            <td>{{ t.producto__nombre }}</td>
+            <td>{{ t.total_cantidad }}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endblock %}

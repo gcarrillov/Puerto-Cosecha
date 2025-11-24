@@ -1,60 +1,94 @@
 from django.db import models
-from usuarios.models import Usuario
 from productos.models import Producto
+from usuarios.models import Usuario
+
 
 class OperacionComercial(models.Model):
-    TIPO = (
-        ('exportacion', 'Exportación'),
-        ('importacion', 'Importación'),
+
+    TIPOS = (
+        ('IMP', 'Importación'),
+        ('EXP', 'Exportación'),
     )
 
-    ESTADO = (
+    ESTADOS = (
         ('pendiente', 'Pendiente'),
-        ('en_proceso', 'En Proceso'),
+        ('en_proceso', 'En proceso'),
         ('en_transito', 'En tránsito'),
         ('finalizado', 'Finalizado'),
         ('cancelado', 'Cancelado'),
     )
 
-    MONEDAS = (
-        ('USD', 'Dólar estadounidense'),
-        ('EUR', 'Euro'),
-        ('PEN', 'Sol peruano'),
+    # --- TIPO ---
+    tipo_operacion = models.CharField(max_length=3, choices=TIPOS)
+
+    # --- ACTORES ---
+    empresa = models.ForeignKey(
+        Usuario,
+        on_delete=models.CASCADE,
+        related_name='operaciones_empresa'
     )
 
-    tipo_operacion = models.CharField(max_length=20, choices=TIPO)
-    empresa = models.ForeignKey(Usuario, on_delete=models.CASCADE, related_name='operaciones_empresa')
+    productor = models.ForeignKey(
+        Usuario,
+        on_delete=models.CASCADE,
+        related_name='operaciones_productor'
+    )
+
     producto = models.ForeignKey(Producto, on_delete=models.CASCADE)
-    cantidad = models.IntegerField()
-    estado = models.CharField(max_length=20, choices=ESTADO, default='pendiente')
-    incoterm = models.CharField(max_length=10)
 
-    # Campos nuevos:
-    puerto_origen = models.CharField(max_length=100, blank=True)
-    puerto_destino = models.CharField(max_length=100, blank=True)
-    pais_destino = models.CharField(max_length=50, blank=True)
-    moneda = models.CharField(max_length=3, choices=MONEDAS, default='USD')
-    precio_total = models.DecimalField(
-        max_digits=14,
-        decimal_places=2,
-        null=True,
-        blank=True,
-        help_text="Monto total acordado para la operación."
-    )
-    fecha_salida = models.DateField(null=True, blank=True)
-    fecha_llegada_estimada = models.DateField(null=True, blank=True)
+    # --- CANTIDAD / PRECIOS ---
+    cantidad = models.PositiveIntegerField()
+    precio_unitario = models.DecimalField(max_digits=10, decimal_places=2, editable=False)
+    precio_total = models.DecimalField(max_digits=12, decimal_places=2, editable=False)
+
+    # --- LOGÍSTICA ---
+    incoterm = models.CharField(max_length=10)
+    pais_destino = models.CharField(max_length=120)
+    puerto_origen = models.CharField(max_length=120, blank=True, null=True)
+    puerto_destino = models.CharField(max_length=120, blank=True, null=True)
+
+    # --- ECONOMÍA ---
+    moneda = models.CharField(max_length=10, default="USD")
+
+    # --- ESTADO ---
+    estado = models.CharField(max_length=20, choices=ESTADOS, default='pendiente')
 
     fecha_creacion = models.DateTimeField(auto_now_add=True)
 
+    # =============================
+    # VALIDACIONES + CÁLCULO
+    # =============================
+    def clean(self):
+        if self.cantidad <= 0:
+            raise ValueError("La cantidad debe ser mayor a 0.")
+
+        if self.producto.stock < self.cantidad:
+            raise ValueError("Cantidad solicitada excede el stock disponible.")
+
+    def calcular_precio_total(self):
+        # Asumimos que Producto tiene precio_unitario
+        self.precio_unitario = self.producto.precio_unitario
+        self.precio_total = self.cantidad * self.precio_unitario
+
+    def save(self, *args, **kwargs):
+        self.clean()
+        self.calcular_precio_total()
+        super().save(*args, **kwargs)
+
     def __str__(self):
-        return f"{self.tipo_operacion} - {self.producto.nombre} - {self.empresa.user.username}"
+        return f"{self.get_tipo_operacion_display()} - {self.producto.nombre} ({self.estado})"
+
+
+# ====================================
+# DOCUMENTOS ADUANEROS
+# ====================================
 
 class DocumentoAduanero(models.Model):
     TIPOS = (
-        ('factura', 'Factura comercial'),
-        ('packing_list', 'Packing List'),
-        ('cert_fito', 'Certificado fitosanitario'),
-        ('otros', 'Otros'),
+        ('factura', 'Factura'),
+        ('guia_remision', 'Guía de Remisión'),
+        ('certificado_origen', 'Certificado de Origen'),
+        ('otro', 'Otro'),
     )
 
     operacion = models.ForeignKey(
@@ -62,10 +96,13 @@ class DocumentoAduanero(models.Model):
         on_delete=models.CASCADE,
         related_name='documentos'
     )
-    tipo = models.CharField(max_length=20, choices=TIPOS)
+
+    tipo = models.CharField(max_length=50, choices=TIPOS)
     archivo = models.FileField(upload_to='documentos_aduaneros/')
-    descripcion = models.CharField(max_length=255, blank=True)
+    descripcion = models.TextField(blank=True)
+
     fecha_subida = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
-        return f"{self.get_tipo_display()} - Operación {self.operacion.id}"
+        return f"{self.tipo} - Op {self.operacion.id}"
+

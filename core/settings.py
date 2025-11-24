@@ -82,7 +82,7 @@ DATABASES = {
         'USER': 'agrfsi_user',
         'PASSWORD': 'agrfsi_pass_2025',
         'HOST': 'localhost',
-        'PORT': '7777',
+        'PORT': '5432',
     }
 }
 
@@ -130,3 +130,6 @@ STATIC_URL = 'static/'
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+MEDIA_URL = '/media/'
+MEDIA_ROOT = BASE_DIR / 'media'
