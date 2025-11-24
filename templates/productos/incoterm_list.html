@@ -3,16 +3,34 @@
 {% block title %}Incoterms{% endblock %}
 
 {% block content %}
-<h2>Incoterms registrados</h2>
+<div class="card">
+    <div class="card-header">
+        <h2 class="card-title">Incoterms registrados</h2>
+        <span class="muted">Referencia rápida para productores y compradores</span>
+    </div>
 
-<ul>
-    {% for inc in incoterms %}
-        <li>
-            <strong>{{ inc.codigo }}</strong> - {{ inc.nombre }}<br>
-            <small>{{ inc.descripcion }}</small>
-        </li>
-    {% empty %}
-        <li>No hay Incoterms registrados.</li>
-    {% endfor %}
-</ul>
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Código</th>
+                <th>Nombre</th>
+                <th>Descripción</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for inc in incoterms %}
+                <tr>
+                    <td><span class="code-pill">{{ inc.codigo }}</span></td>
+                    <td>{{ inc.nombre }}</td>
+                    <td class="muted">{{ inc.descripcion }}</td>
+                </tr>
+            {% empty %}
+                <tr>
+                    <td colspan="3" class="muted">No hay incoterms registrados.</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
 {% endblock %}
+

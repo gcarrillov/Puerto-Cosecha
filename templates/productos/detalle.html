@@ -3,117 +3,186 @@
 {% block title %}{{ producto.nombre }}{% endblock %}
 
 {% block content %}
-<h2>{{ producto.nombre }}</h2>
 
-<p><strong>Productor:</strong> {{ producto.productor.user.username }}</p>
-<p><strong>Descripción:</strong> {{ producto.descripcion }}</p>
-<p><strong>Precio unitario:</strong> {{ producto.precio_unitario }}</p>
-<p><strong>Stock:</strong> {{ producto.stock }}</p>
-<p><strong>País de origen:</strong> {{ producto.pais_origen }}</p>
-<h3>Incoterms aplicables</h3>
-{% if producto.incoterms.all %}
-    <ul>
+<div class="card">
+    <div class="card-header">
+        <h2 class="card-title">{{ producto.nombre }}</h2>
+        <span class="badge">
+            {{ producto.pais_origen }} · {{ producto.get_categoria_display }}
+        </span>
+    </div>
+
+    <div class="meta-grid">
+        <div>
+            <div class="meta-label">Productor</div>
+            <div class="meta-value">
+                {{ producto.productor.user.username }}
+            </div>
+        </div>
+        <div>
+            <div class="meta-label">Precio unitario</div>
+            <div class="meta-value">
+                USD {{ producto.precio_unitario }}
+            </div>
+        </div>
+        <div>
+            <div class="meta-label">Stock disponible</div>
+            <div class="meta-value">
+                {{ producto.stock }} {{ producto.get_unidad_medida_display }}
+            </div>
+        </div>
+        <div>
+            <div class="meta-label">Fecha de registro</div>
+            <div class="meta-value">
+                {{ producto.fecha_registro|date:"d/m/Y H:i" }}
+            </div>
+        </div>
+        <div>
+            <div class="meta-label">Perecible</div>
+            <div class="meta-value">
+                {% if producto.es_perecible %}Sí{% else %}No{% endif %}
+            </div>
+        </div>
+    </div>
+
+    <p class="muted">
+        {{ producto.descripcion }}
+    </p>
+
+    {% if producto.certificaciones %}
+        <div class="meta-label" style="margin-top:0.5rem;">Certificaciones</div>
+        <p class="muted">{{ producto.certificaciones }}</p>
+    {% endif %}
+</div>
+
+<div class="section-card">
+    <h3 class="section-title">Incoterms aplicables</h3>
+
+    {% if producto.incoterms.all %}
         {% for inc in producto.incoterms.all %}
-            <li>
-                <strong>{{ inc.codigo }}</strong> - {{ inc.nombre }}<br>
-                <small>{{ inc.descripcion|default:"" }}</small>
-            </li>
+            <div class="incoterm-item">
+                <div>
+                    <span class="code-pill">{{ inc.codigo }}</span>
+                    <strong>{{ inc.nombre }}</strong>
+                </div>
+                {% if inc.descripcion %}
+                    <div class="muted">
+                        {{ inc.descripcion }}
+                    </div>
+                {% endif %}
+            </div>
         {% endfor %}
-    </ul>
-{% else %}
-    <p>Este producto no tiene incoterms asociados todavía.</p>
-{% endif %}
+    {% else %}
+        <p class="muted">Este producto aún no tiene incoterms asociados.</p>
+    {% endif %}
 
-<h3>Normativa comercial asociada</h3>
-{% if producto.normas_comerciales.all %}
-    <ul>
+    <p style="margin-top:0.5rem;">
+        <a href="{% url 'lista_incoterms' %}" class="link">Ver todos los incoterms registrados →</a>
+    </p>
+</div>
+
+<div class="section-card">
+    <h3 class="section-title">Normativa comercial asociada</h3>
+
+    {% if producto.normas_comerciales.all %}
         {% for norma in producto.normas_comerciales.all %}
-            <li>
-                <strong>{{ norma.pais }} - {{ norma.get_tipo_display }}</strong>
-                {% if norma.categoria_producto %}
-                    ({{ norma.categoria_producto }})
-                {% endif %}
-                <br>
-                <small>{{ norma.descripcion }}</small>
-                {% if norma.enlace_oficial %}
-                    <br>
-                    <a href="{{ norma.enlace_oficial }}" target="_blank">Ver enlace oficial</a>
-                {% endif %}
-            </li>
-        {% endfor %}
-    </ul>
-{% else %}
-    <p>No se ha asociado normativa específica para este producto.</p>
-{% endif %}
-
-<p>
-    <a href="{% url 'lista_incoterms' %}">Ver todos los Incoterms</a> |
-    <a href="{% url 'lista_normativa' %}">Ver toda la normativa</a>
-</p>
-
-
-<hr>
-
-<h3>Operaciones y documentos asociados</h3>
-
-{% if operaciones %}
-    <ul>
-        {% for op in operaciones %}
-            <li>
-                {{ op.get_tipo_operacion_display }} -
-                {{ op.empresa.user.username }} -
-                {{ op.fecha_creacion }}
-
-                {% with docs=op.documentos.all %}
-                    {% if docs %}
-                        <ul>
-                            {% for doc in docs %}
-                                <li>
-                                    {{ doc.get_tipo_display }} -
-                                    {% if doc.archivo %}
-                                        <a href="{{ doc.archivo.url }}" target="_blank">Ver documento</a>
-                                    {% else %}
-                                        (sin archivo)
-                                    {% endif %}
-                                    {% if doc.descripcion %}
-                                        - {{ doc.descripcion }}
-                                    {% endif %}
-                                </li>
-                            {% endfor %}
-                        </ul>
-                    {% else %}
-                        (Sin documentos)
+            <div class="norma-item">
+                <div>
+                    <strong>{{ norma.pais }} · {{ norma.get_tipo_display }}</strong>
+                    {% if norma.categoria_producto %}
+                        <span class="muted">({{ norma.categoria_producto }})</span>
                     {% endif %}
-                {% endwith %}
-            </li>
+                </div>
+                <div class="muted">
+                    {{ norma.descripcion }}
+                </div>
+                {% if norma.enlace_oficial %}
+                    <div style="margin-top:0.2rem;">
+                        <a href="{{ norma.enlace_oficial }}" target="_blank" class="link">
+                            Ver normativa oficial
+                        </a>
+                    </div>
+                {% endif %}
+            </div>
         {% endfor %}
-    </ul>
-{% else %}
-    <p>No hay operaciones registradas para este producto.</p>
-{% endif %}
+    {% else %}
+        <p class="muted">No se ha registrado normativa específica para este producto.</p>
+    {% endif %}
 
-<hr>
+    <p style="margin-top:0.5rem;">
+        <a href="{% url 'lista_normativa' %}" class="link">Ver todas las normas comerciales →</a>
+    </p>
+</div>
 
-{# Si es empresa logueada, puede solicitar operación #}
-{% if user.is_authenticated and user.perfil.rol == 'empresa' %}
-    <p>
-        <a href="{% url 'crear_operacion' producto.pk %}">
-            Solicitar operación comercial
+<div class="section-card">
+    <h3 class="section-title">Operaciones y documentos asociados</h3>
+
+    {% if operaciones %}
+        <ul>
+            {% for op in operaciones %}
+                <li>
+                    <strong>{{ op.get_tipo_operacion_display }}</strong>
+                    · {{ op.empresa.user.username }}
+                    · {{ op.fecha_creacion|date:"d/m/Y H:i" }}
+
+                    {% with docs=op.documentos.all %}
+                        {% if docs %}
+                            <ul>
+                                {% for doc in docs %}
+                                    <li>
+                                        {{ doc.get_tipo_display }} -
+                                        {% if doc.archivo %}
+                                            <a href="{{ doc.archivo.url }}" target="_blank" class="link">Ver documento</a>
+                                        {% else %}
+                                            <span class="muted">(sin archivo)</span>
+                                        {% endif %}
+                                        {% if doc.descripcion %}
+                                            - <span class="muted">{{ doc.descripcion }}</span>
+                                        {% endif %}
+                                    </li>
+                                {% endfor %}
+                            </ul>
+                        {% else %}
+                            <span class="muted">(Sin documentos)</span>
+                        {% endif %}
+                    {% endwith %}
+                </li>
+            {% endfor %}
+        </ul>
+    {% else %}
+        <p class="muted">No hay operaciones registradas para este producto.</p>
+    {% endif %}
+
+    <hr style="margin:0.75rem 0;">
+
+    {# Si es empresa logueada, puede solicitar operación #}
+    {% if user.is_authenticated and user.perfil.rol == 'empresa' %}
+        <p>
+            <a href="{% url 'crear_operacion' producto.pk %}" class="btn btn-primary">
+                Solicitar operación comercial
+            </a>
+        </p>
+    {% elif not user.is_authenticated %}
+        <p class="muted">
+            Para solicitar una operación comercial, debes
+            <a href="{% url 'login' %}?next={% url 'detalle_producto' producto.pk %}" class="link">
+                iniciar sesión
+            </a>.
+        </p>
+    {% endif %}
+</div>
+
+<div style="margin-top:0.75rem;">
+    {# Si es el productor dueño del producto, puede editarlo #}
+    {% if user.is_authenticated and user.perfil == producto.productor %}
+        <a href="{% url 'editar_producto' producto.pk %}" class="btn btn-secondary">
+            Editar este producto
         </a>
-    </p>
-{% elif not user.is_authenticated %}
-    <p>
-        Para solicitar una operación comercial, debes
-        <a href="{% url 'login' %}?next={% url 'detalle_producto' producto.pk %}">iniciar sesión</a>.
-    </p>
-{% endif %}
+    {% endif %}
 
-{# Si es el productor dueño del producto, puede editarlo #}
-{% if user.is_authenticated and user.perfil == producto.productor %}
-    <p>
-        <a href="{% url 'editar_producto' producto.pk %}">Editar este producto</a>
-    </p>
-{% endif %}
+    <a href="{% url 'lista_productos' %}" class="btn">
+        ← Volver al listado
+    </a>
+</div>
 
-<a href="{% url 'lista_productos' %}">← Volver al listado</a>
 {% endblock %}
