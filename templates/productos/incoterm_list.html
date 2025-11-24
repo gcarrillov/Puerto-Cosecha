@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+
+{% block title %}Incoterms{% endblock %}
+
+{% block content %}
+<h2>Incoterms registrados</h2>
+
+<ul>
+    {% for inc in incoterms %}
+        <li>
+            <strong>{{ inc.codigo }}</strong> - {{ inc.nombre }}<br>
+            <small>{{ inc.descripcion }}</small>
+        </li>
+    {% empty %}
+        <li>No hay Incoterms registrados.</li>
+    {% endfor %}
+</ul>
+{% endblock %}

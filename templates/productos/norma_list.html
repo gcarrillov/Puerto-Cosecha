@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+
+{% block title %}Normativa comercial{% endblock %}
+
+{% block content %}
+<h2>Normativa comercial</h2>
+
+<form method="get" style="margin-bottom: 1rem;">
+    <label>
+        País:
+        <input type="text" name="pais" value="{{ pais }}">
+    </label>
+    <label>
+        Tipo:
+        <select name="tipo">
+            <option value="">-- Todos --</option>
+            <option value="EXP" {% if tipo == "EXP" %}selected{% endif %}>Exportación</option>
+            <option value="IMP" {% if tipo == "IMP" %}selected{% endif %}>Importación</option>
+            <option value="AMB" {% if tipo == "AMB" %}selected{% endif %}>Ambos</option>
+        </select>
+    </label>
+    <button type="submit">Filtrar</button>
+</form>
+
+<ul>
+    {% for norma in normas %}
+        <li>
+            <strong>{{ norma.pais }} - {{ norma.get_tipo_display }}</strong>
+            {% if norma.categoria_producto %}
+                ({{ norma.categoria_producto }})
+            {% endif %}
+            <br>
+            <small>{{ norma.descripcion }}</small>
+            {% if norma.enlace_oficial %}
+                <br>
+                <a href="{{ norma.enlace_oficial }}" target="_blank">Ver enlace oficial</a>
+            {% endif %}
+        </li>
+    {% empty %}
+        <li>No se encontraron normas con los filtros actuales.</li>
+    {% endfor %}
+</ul>
+{% endblock %}

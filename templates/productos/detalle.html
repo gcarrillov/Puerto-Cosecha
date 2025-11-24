@@ -10,6 +10,47 @@
 <p><strong>Precio unitario:</strong> {{ producto.precio_unitario }}</p>
 <p><strong>Stock:</strong> {{ producto.stock }}</p>
 <p><strong>País de origen:</strong> {{ producto.pais_origen }}</p>
+<h3>Incoterms aplicables</h3>
+{% if producto.incoterms.all %}
+    <ul>
+        {% for inc in producto.incoterms.all %}
+            <li>
+                <strong>{{ inc.codigo }}</strong> - {{ inc.nombre }}<br>
+                <small>{{ inc.descripcion|default:"" }}</small>
+            </li>
+        {% endfor %}
+    </ul>
+{% else %}
+    <p>Este producto no tiene incoterms asociados todavía.</p>
+{% endif %}
+
+<h3>Normativa comercial asociada</h3>
+{% if producto.normas_comerciales.all %}
+    <ul>
+        {% for norma in producto.normas_comerciales.all %}
+            <li>
+                <strong>{{ norma.pais }} - {{ norma.get_tipo_display }}</strong>
+                {% if norma.categoria_producto %}
+                    ({{ norma.categoria_producto }})
+                {% endif %}
+                <br>
+                <small>{{ norma.descripcion }}</small>
+                {% if norma.enlace_oficial %}
+                    <br>
+                    <a href="{{ norma.enlace_oficial }}" target="_blank">Ver enlace oficial</a>
+                {% endif %}
+            </li>
+        {% endfor %}
+    </ul>
+{% else %}
+    <p>No se ha asociado normativa específica para este producto.</p>
+{% endif %}
+
+<p>
+    <a href="{% url 'lista_incoterms' %}">Ver todos los Incoterms</a> |
+    <a href="{% url 'lista_normativa' %}">Ver toda la normativa</a>
+</p>
+
 
 <hr>
 
