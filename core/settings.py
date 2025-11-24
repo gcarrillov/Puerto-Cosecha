@@ -82,7 +82,7 @@ DATABASES = {
         'USER': 'agrfsi_user',
         'PASSWORD': 'agrfsi_pass_2025',
         'HOST': 'localhost',
-        'PORT': '7777',
+        'PORT': '5432',
     }
 }
 

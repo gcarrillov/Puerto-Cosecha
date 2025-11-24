@@ -3,34 +3,69 @@
 {% block title %}Mis operaciones{% endblock %}
 
 {% block content %}
-<h2>Mis operaciones comerciales</h2>
+<div class="container mt-4">
 
-{% if operaciones %}
-    <table border="1" cellpadding="5" cellspacing="0">
-        <tr>
-            <th>Fecha</th>
-            <th>Tipo</th>
-            <th>Producto</th>
-            <th>Cantidad</th>
-            <th>Incoterm</th>
-            <th>Estado</th>
-            <th>Moneda</th>
-            <th>Precio total</th>
-        </tr>
-        {% for op in operaciones %}
-            <tr>
-                <td>{{ op.fecha_creacion }}</td>
-                <td>{{ op.get_tipo_operacion_display }}</td>
-                <td>{{ op.producto.nombre }}</td>
-                <td>{{ op.cantidad }}</td>
-                <td>{{ op.incoterm }}</td>
-                <td>{{ op.get_estado_display }}</td>
-                <td>{{ op.moneda }}</td>
-                <td>{{ op.precio_total }}</td>
-            </tr>
-        {% endfor %}
-    </table>
-{% else %}
-    <p>No tienes operaciones registradas.</p>
-{% endif %}
+    <h2 class="mb-4">Mis operaciones comerciales</h2>
+
+    {% if operaciones %}
+    
+    <div class="table-responsive">
+        <table class="table table-striped table-hover align-middle">
+            <thead class="table-dark">
+                <tr>
+                    <th>Fecha</th>
+                    <th>Tipo</th>
+                    <th>Producto</th>
+                    <th>Cantidad</th>
+                    <th>Incoterm</th>
+                    <th>Estado</th>
+                    <th>Moneda</th>
+                    <th>Precio total</th>
+                    <th></th>
+                </tr>
+            </thead>
+
+            <tbody>
+                {% for op in operaciones %}
+                <tr>
+                    <td>{{ op.fecha_creacion|date:"d/m/Y H:i" }}</td>
+                    <td>{{ op.get_tipo_operacion_display }}</td>
+                    <td>{{ op.producto.nombre }}</td>
+                    <td>{{ op.cantidad }}</td>
+                    <td>{{ op.incoterm }}</td>
+
+                    <td>
+                        {% if op.estado == "pendiente" %}
+                            <span class="badge bg-warning text-dark">Pendiente</span>
+                        {% elif op.estado == "en_proceso" %}
+                            <span class="badge bg-info text-dark">En proceso</span>
+                        {% elif op.estado == "en_transito" %}
+                            <span class="badge bg-primary">En tránsito</span>
+                        {% elif op.estado == "finalizado" %}
+                            <span class="badge bg-success">Finalizado</span>
+                        {% elif op.estado == "cancelado" %}
+                            <span class="badge bg-danger">Cancelado</span>
+                        {% endif %}
+                    </td>
+
+                    <td>{{ op.moneda }}</td>
+                    <td><strong>{{ op.precio_total }}</strong></td>
+
+                    <td>
+                        <a href="{% url 'detalle_operacion' op.id %}" class="btn btn-sm btn-outline-primary">
+                            Ver detalle
+                        </a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+
+        </table>
+    </div>
+
+    {% else %}
+        <p class="text-muted mt-3">No tienes operaciones registradas.</p>
+    {% endif %}
+
+</div>
 {% endblock %}

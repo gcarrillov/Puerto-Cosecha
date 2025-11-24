@@ -1,0 +1,85 @@
+{% extends "base.html" %}
+
+{% block title %}Detalle de operación {{ operacion.id }}{% endblock %}
+
+{% block content %}
+<h2 class="mb-3">Detalle de la operación #{{ operacion.id }}</h2>
+
+<div class="card mb-4">
+    <div class="card-header">
+        <strong>Información general</strong>
+    </div>
+    <div class="card-body">
+        <p><strong>Producto:</strong> {{ operacion.producto.nombre }}</p>
+        <p><strong>Tipo de operación:</strong> {{ operacion.get_tipo_operacion_display }}</p>
+        <p><strong>Cantidad:</strong> {{ operacion.cantidad }}</p>
+        <p><strong>Precio unitario:</strong> {{ operacion.precio_unitario }}</p>
+        <p><strong>Precio total:</strong> {{ operacion.precio_total }}</p>
+        <p><strong>Incoterm:</strong> {{ operacion.incoterm }}</p>
+        <p><strong>Puertos:</strong> {{ operacion.puerto_origen }} → {{ operacion.puerto_destino }}</p>
+        <p><strong>País destino:</strong> {{ operacion.pais_destino }}</p>
+        <p><strong>Estado actual:</strong> 
+            <span class="badge bg-primary">{{ operacion.get_estado_display }}</span>
+        </p>
+    </div>
+</div>
+
+<!-- ============================================== -->
+<!-- Cambiar estado -->
+<!-- ============================================== -->
+<h3>Cambiar estado</h3>
+
+<div class="mb-4">
+    <a class="btn btn-secondary btn-sm" href="{% url 'cambiar_estado' operacion.id 'pendiente' %}">Pendiente</a>
+    <a class="btn btn-warning btn-sm" href="{% url 'cambiar_estado' operacion.id 'en_proceso' %}">En proceso</a>
+    <a class="btn btn-info btn-sm" href="{% url 'cambiar_estado' operacion.id 'en_transito' %}">En tránsito</a>
+    <a class="btn btn-success btn-sm" href="{% url 'cambiar_estado' operacion.id 'finalizado' %}">Finalizado</a>
+    <a class="btn btn-danger btn-sm" href="{% url 'cambiar_estado' operacion.id 'cancelado' %}">Cancelado</a>
+</div>
+
+<hr>
+
+<!-- ============================================== -->
+<!-- Documentos aduaneros -->
+<!-- ============================================== -->
+<h3>Documentos aduaneros</h3>
+
+{% if documentos %}
+<table class="table table-bordered">
+    <thead>
+        <tr>
+            <th>Tipo</th>
+            <th>Archivo</th>
+            <th>Descripción</th>
+            <th>Fecha subida</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for doc in documentos %}
+        <tr>
+            <td>{{ doc.get_tipo_display }}</td>
+            <td><a href="{{ doc.archivo.url }}" target="_blank">Ver documento</a></td>
+            <td>{{ doc.descripcion }}</td>
+            <td>{{ doc.fecha_subida }}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% else %}
+<p>No hay documentos subidos.</p>
+{% endif %}
+
+<hr>
+
+<!-- ============================================== -->
+<!-- Subir documento -->
+<!-- ============================================== -->
+<h3>Subir documento aduanero</h3>
+
+<form method="post" enctype="multipart/form-data" action="{% url 'subir_documento' operacion.id %}">
+    {% csrf_token %}
+    {{ form_doc.as_p }}
+    <button class="btn btn-primary" type="submit">Subir documento</button>
+</form>
+
+{% endblock %}
