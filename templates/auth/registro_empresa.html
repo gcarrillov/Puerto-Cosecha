@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+{% load static %}
+{% block content %}
+  <h2>Registro - Empresa</h2>
+  {% for message in messages %}
+    <div class="message {{ message.tags }}">{{ message }}</div>
+  {% endfor %}
+  <form method="post">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button type="submit">Registrarme como empresa</button>
+  </form>
+  <p>¿Ya tienes cuenta? <a href="{% url 'usuarios:login' %}">Ingresar</a></p>
+{% endblock %}

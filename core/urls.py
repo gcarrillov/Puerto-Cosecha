@@ -7,29 +7,26 @@ from django.conf.urls.static import static
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    #path('', RedirectView.as_view(url='/admin/', permanent=False)),   # redireccion para admin directo (solo para el desarrollo de la web)
 
-    path(
-        '',
-        TemplateView.as_view(template_name='home.html'),
-        name='home'
-        ),
-
-    # autenticacion / login
+    # AUTENTICACIÓN (login/logout)
     path(
         'accounts/login/',
         auth_views.LoginView.as_view(template_name='auth/login.html'),
         name='login'
-        ),
+    ),
     path(
         'accounts/logout/',
-        auth_views.LogoutView.as_view(),   # se usa LOGOUT_REDIRECT_URL
+        auth_views.LogoutView.as_view(),
         name='logout'
-        ),
+    ),
+
+    # REGISTROS (productor/empresa)
+    path('accounts/', include('usuarios.urls')),
+
     # Productos
     path('productos/', include('productos.urls')),
 
-    # Operaciones comerciales
+    # Operaciones
     path('operaciones/', include('operaciones.urls')),
 ]
 if settings.DEBUG:
