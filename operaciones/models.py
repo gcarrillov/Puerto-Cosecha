@@ -72,7 +72,7 @@ class OperacionComercial(models.Model):
 
     def save(self, *args, **kwargs):
         self.clean()
-        self.calcular_precicio_total()
+        self.calcular_precio_total()
         super().save(*args, **kwargs)
 
     def __str__(self):
@@ -105,3 +105,4 @@ class DocumentoAduanero(models.Model):
 
     def __str__(self):
         return f"{self.tipo} - Op {self.operacion.id}"
+
