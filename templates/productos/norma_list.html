@@ -1,0 +1,66 @@
+{% extends "base.html" %}
+
+{% block title %}Normativa comercial{% endblock %}
+
+{% block content %}
+<div class="card">
+    <div class="card-header">
+        <h2 class="card-title">Normativa comercial</h2>
+        <span class="muted">Consulta básica por país y tipo (exportación/importación)</span>
+    </div>
+
+    <form method="get" class="filters">
+        <label>
+            País:
+            <input type="text" name="pais" value="{{ pais }}">
+        </label>
+        <label>
+            Tipo:
+            <select name="tipo">
+                <option value="">Todos</option>
+                <option value="EXP" {% if tipo == "EXP" %}selected{% endif %}>Exportación</option>
+                <option value="IMP" {% if tipo == "IMP" %}selected{% endif %}>Importación</option>
+                <option value="AMB" {% if tipo == "AMB" %}selected{% endif %}>Ambos</option>
+            </select>
+        </label>
+        <button type="submit" class="btn btn-secondary">Filtrar</button>
+        <a href="{% url 'lista_normativa' %}" class="btn btn-secondary">Limpiar</a>
+    </form>
+
+    <table class="table">
+        <thead>
+            <tr>
+                <th>País</th>
+                <th>Tipo</th>
+                <th>Categoría</th>
+                <th>Descripción</th>
+                <th>Enlace</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for norma in normas %}
+                <tr>
+                    <td>{{ norma.pais }}</td>
+                    <td>{{ norma.get_tipo_display }}</td>
+                    <td>{{ norma.categoria_producto|default:"—" }}</td>
+                    <td class="muted">{{ norma.descripcion }}</td>
+                    <td>
+                        {% if norma.enlace_oficial %}
+                            <a href="{{ norma.enlace_oficial }}" target="_blank" class="link">
+                                Ver
+                            </a>
+                        {% else %}
+                            <span class="muted">N/A</span>
+                        {% endif %}
+                    </td>
+                </tr>
+            {% empty %}
+                <tr>
+                    <td colspan="5" class="muted">No se encontraron normas con los filtros aplicados.</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}
+

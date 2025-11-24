@@ -3,78 +3,332 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% block title %}Puerto Cosecha{% endblock %} | Agro Exportación</title>
-    
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <!-- Google Fonts -->
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <title>{% block title %}AGRFSI{% endblock %}</title>
 
     <style>
         :root {
-            --primary-color: #2E7D32; /* Verde Agrícola */
-            --secondary-color: #F9A825; /* Amarillo Sol */
-            --accent-blue: #0277BD; 
-            --text-dark: #212529;
+            --primary: #0b7a75;
+            --primary-dark: #075753;
+            --accent: #f4a261;
+            --bg: #f5f7fb;
+            --card-bg: #ffffff;
+            --text-main: #1f2933;
+            --text-muted: #6b7280;
+            --border-soft: #e5e7eb;
         }
-        body { font-family: 'Inter', sans-serif; background-color: #f8f9fa; min-height: 100vh; display: flex; flex-direction: column; }
-        
-        /* Navbar */
-        .navbar-custom { background-color: white; box-shadow: 0 2px 10px rgba(0,0,0,0.05); }
-        .navbar-brand { color: var(--primary-color) !important; font-weight: 700; }
-        .nav-link { color: var(--text-dark); font-weight: 500; }
-        .nav-link:hover { color: var(--primary-color); }
-        .btn-primary-custom { background-color: var(--primary-color); border: none; color: white; }
-        .btn-primary-custom:hover { background-color: #1B5E20; color: white; }
-        
-        /* Footer */
-        footer { background-color: #263238; color: #eceff1; margin-top: auto; padding: 2rem 0; }
-        footer a { color: #b0bec5; text-decoration: none; }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+            background: var(--bg);
+            color: var(--text-main);
+        }
+
+        header {
+            background: linear-gradient(90deg, var(--primary), var(--primary-dark));
+            color: white;
+            padding: 0.75rem 0;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.12);
+        }
+
+        .navbar {
+            max-width: 1100px;
+            margin: 0 auto;
+            padding: 0 1rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 1rem;
+        }
+
+        .navbar-brand {
+            font-weight: 700;
+            font-size: 1.1rem;
+            letter-spacing: 0.05em;
+        }
+
+        .navbar-nav {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            font-size: 0.95rem;
+        }
+
+        .navbar a {
+            color: #e5f5f4;
+            text-decoration: none;
+        }
+
+        .navbar a:hover {
+            text-decoration: underline;
+        }
+
+        .navbar-user {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.9rem;
+        }
+
+        .navbar-user span {
+            color: #d1f0ee;
+        }
+
+        .inline-form {
+            display: inline;
+            margin: 0;
+        }
+
+        .inline-form button {
+            border: none;
+            background: transparent;
+            color: #e5f5f4;
+            cursor: pointer;
+            padding: 0;
+            font: inherit;
+        }
+
+        .inline-form button:hover {
+            text-decoration: underline;
+        }
+
+        main.container {
+            max-width: 1100px;
+            margin: 1.5rem auto 2rem;
+            padding: 0 1rem;
+        }
+
+        .card {
+            background: var(--card-bg);
+            border-radius: 0.75rem;
+            padding: 1.25rem 1.5rem;
+            box-shadow: 0 4px 12px rgba(15, 23, 42, 0.08);
+            border: 1px solid var(--border-soft);
+            margin-bottom: 1.25rem;
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: baseline;
+            margin-bottom: 0.75rem;
+        }
+
+        .card-title {
+            margin: 0;
+            font-size: 1.3rem;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 0.15rem 0.5rem;
+            border-radius: 999px;
+            font-size: 0.75rem;
+            font-weight: 500;
+            background: rgba(255,255,255,0.12);
+            border: 1px solid rgba(255,255,255,0.35);
+        }
+
+        h2, h3 {
+            margin-top: 0;
+        }
+
+        .section-title {
+            font-size: 1.05rem;
+            margin: 0 0 0.5rem;
+        }
+
+        .meta-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 0.5rem 1.25rem;
+            margin-bottom: 0.75rem;
+            font-size: 0.9rem;
+        }
+
+        .meta-label {
+            font-weight: 600;
+            color: var(--text-muted);
+            font-size: 0.85rem;
+        }
+
+        .meta-value {
+            margin-top: 0.15rem;
+        }
+
+        .section-card {
+            background: var(--card-bg);
+            border-radius: 0.75rem;
+            padding: 1rem 1.25rem;
+            border: 1px solid var(--border-soft);
+            margin-bottom: 1rem;
+        }
+
+        .incoterm-item, .norma-item {
+            padding: 0.5rem 0;
+            border-bottom: 1px solid #edf0f6;
+        }
+
+        .incoterm-item:last-child,
+        .norma-item:last-child {
+            border-bottom: none;
+        }
+
+        .code-pill {
+            display: inline-block;
+            padding: 0.15rem 0.55rem;
+            border-radius: 999px;
+            background: rgba(11, 122, 117, 0.1);
+            color: var(--primary-dark);
+            font-size: 0.8rem;
+            font-weight: 600;
+            margin-right: 0.3rem;
+        }
+
+        .muted {
+            color: var(--text-muted);
+            font-size: 0.88rem;
+        }
+
+        .link {
+            color: var(--primary-dark);
+            font-weight: 500;
+            text-decoration: none;
+        }
+
+        .link:hover {
+            text-decoration: underline;
+        }
+
+        .btn {
+            display: inline-block;
+            padding: 0.4rem 0.9rem;
+            border-radius: 999px;
+            border: 1px solid var(--primary);
+            background: white;
+            color: var(--primary-dark);
+            text-decoration: none;
+            font-size: 0.9rem;
+            font-weight: 500;
+            cursor: pointer;
+        }
+
+        .btn:hover {
+            background: rgba(11, 122, 117, 0.06);
+        }
+
+        .btn-secondary {
+            border-color: var(--border-soft);
+            color: var(--text-main);
+        }
+
+        .btn-secondary:hover {
+            background: #f1f3f8;
+        }
+
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+            border-color: var(--primary-dark);
+        }
+
+        .btn-primary:hover {
+            background: var(--primary-dark);
+        }
+
+        .chip-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.3rem;
+        }
+
+        .chip {
+            padding: 0.15rem 0.6rem;
+            border-radius: 999px;
+            background: #edf0f6;
+            font-size: 0.8rem;
+        }
+
+        .table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.9rem;
+        }
+
+        .table th,
+        .table td {
+            padding: 0.5rem 0.6rem;
+            border-bottom: 1px solid #edf0f6;
+            text-align: left;
+        }
+
+        .table th {
+            background: #f3f4fa;
+            font-weight: 600;
+            font-size: 0.85rem;
+        }
+
+        .filters {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem 0.75rem;
+            margin-bottom: 0.75rem;
+            font-size: 0.9rem;
+        }
+
+        .filters input,
+        .filters select {
+            padding: 0.25rem 0.4rem;
+            border-radius: 0.4rem;
+            border: 1px solid var(--border-soft);
+            font-size: 0.9rem;
+        }
+
+        footer {
+            text-align: center;
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            padding: 1rem 0 1.5rem;
+        }
     </style>
 </head>
 <body>
     <header>
-        <h1>Plataforma AGRFSI</h1>
+        <div class="navbar">
+            <div class="navbar-brand">
+                PUERTO COSECHA
+            </div>
+            <nav class="navbar-nav">
+                <a href="{% url 'lista_productos' %}">Productos</a>
+                <a href="{% url 'lista_incoterms' %}">Incoterms</a>
+                <a href="{% url 'lista_normativa' %}">Normativa</a>
 
-        <nav>
-            <a href="/">Inicio</a> |
-            <a href="{% url 'lista_productos' %}">Productos</a> |
+                {% if user.is_authenticated %}
+                    <span>| Hola, {{ user.username }}</span>
+                    <form action="{% url 'logout' %}" method="post" class="inline-form">
+                        {% csrf_token %}
+                        <button type="submit">Cerrar sesión</button>
+                    </form>
+                    <a href="{% url 'mis_operaciones' %}">Mis operaciones</a>
+                {% else %}
+                    <a href="{% url 'login' %}">Iniciar sesión</a>
+                {% endif %}
 
-            {% if user.is_authenticated %}
-                
-                Hola, {{ user.username }} 
-                ({{ user.perfil.rol|title }}) |
-
-                <!-- Redirección dinámica por rol -->
-                <a href="{% url 'usuarios:redirigir_por_rol' %}">Mi Panel</a> |
-
-                <form action="{% url 'usuarios:logout' %}" method="post" style="display:inline;">
-                    {% csrf_token %}
-                    <button type="submit" style="background:none;border:none;color:blue;cursor:pointer;padding:0;">
-                        Cerrar sesión
-                    </button>
-                </form>
-
-            {% else %}
-                
-                <!-- Opciones de inicio de sesión -->
-                <a href="{% url 'usuarios:login' %}">Iniciar Sesión</a> |
-
-                <!-- Opciones de registro -->
-                <a href="{% url 'usuarios:registro_productor' %}">Soy Productor</a> |
-                <a href="{% url 'usuarios:registro_empresa' %}">Soy Empresa</a>
-
-            {% endif %}
-
-            | <a href="/admin/">Admin</a>
-        </nav>
-        
-        <hr>
+                <a href="/admin/">Admin</a>
+            </nav>
+        </div>
     </header>
 
-    <!-- Bootstrap JS -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <main class="container">
+        {% block content %}{% endblock %}
+    </main>
+
+    <footer>
+        Plataforma AGRFSI – PUERTO COSECHA · Proyecto académico
+    </footer>
 </body>
 </html>

@@ -2,7 +2,7 @@ from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib.auth.decorators import login_required
 from django.http import HttpResponseForbidden
 from operaciones.models import OperacionComercial
-from .models import Producto
+from .models import Producto, Incoterm, NormaComercial
 from .forms import ProductoForm
 
 
@@ -73,3 +73,31 @@ def editar_producto(request, pk):
         form = ProductoForm(instance=producto)
 
     return render(request, 'productos/form.html', {'form': form, 'accion': 'Editar'})
+def lista_incoterms(request):
+    """
+    Página de referencia general de Incoterms.
+    """
+    incoterms = Incoterm.objects.all().order_by("codigo")
+    return render(request, "productos/incoterm_list.html", {"incoterms": incoterms})
+
+
+def lista_normativa(request):
+    """
+    Página de referencia general de normativa comercial con filtros básicos.
+    """
+    pais = request.GET.get("pais", "")
+    tipo = request.GET.get("tipo", "")
+
+    normas = NormaComercial.objects.all()
+    if pais:
+        normas = normas.filter(pais__icontains=pais)
+    if tipo:
+        normas = normas.filter(tipo=tipo)
+
+    context = {
+        "normas": normas,
+        "pais": pais,
+        "tipo": tipo,
+    }
+    return render(request, "productos/norma_list.html", context)
+
