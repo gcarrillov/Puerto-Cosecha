@@ -7,6 +7,13 @@
 
     <h2 class="mb-4">Mis operaciones comerciales</h2>
 
+    {# Mensaje informativo cuando no hay perfil / no es empresa / etc. #}
+    {% if mensaje %}
+        <div class="alert alert-info">
+            {{ mensaje }}
+        </div>
+    {% endif %}
+
     {% if operaciones %}
     
     <div class="table-responsive">
@@ -64,7 +71,10 @@
     </div>
 
     {% else %}
-        <p class="text-muted mt-3">No tienes operaciones registradas.</p>
+        {# Solo mostramos este texto si no hay mensaje específico #}
+        {% if not mensaje %}
+            <p class="text-muted mt-3">No tienes operaciones registradas.</p>
+        {% endif %}
     {% endif %}
 
 </div>

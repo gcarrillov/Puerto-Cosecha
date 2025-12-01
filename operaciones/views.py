@@ -3,6 +3,7 @@ from django.contrib.auth.decorators import login_required
 from django.http import HttpResponseForbidden
 from django.db import models
 from django.db.models import Sum, Count
+from django.core.exceptions import ObjectDoesNotExist
 
 from .models import OperacionComercial, DocumentoAduanero
 from .forms import OperacionForm, DocumentoAduaneroForm
@@ -16,8 +17,13 @@ from productos.models import Producto
 def es_empresa(user):
     """
     Verifica si el usuario autenticado pertenece al rol 'empresa'.
+    Maneja correctamente el caso en el que el usuario NO tenga perfil.
     """
-    return hasattr(user, 'perfil') and user.perfil.rol == 'empresa'
+    try:
+        return hasattr(user, 'perfil') and user.perfil.rol == 'empresa'
+    except ObjectDoesNotExist:
+        # Caso: el reverse OneToOne existe pero no hay fila de perfil
+        return False
 
 
 # -----------------------------------------------------------
@@ -27,7 +33,9 @@ def es_empresa(user):
 @login_required
 def crear_operacion(request, producto_id):
     if not es_empresa(request.user):
-        return HttpResponseForbidden("No tienes permiso para crear operaciones comerciales.")
+        return HttpResponseForbidden(
+            "No tienes permiso para crear operaciones comerciales."
+        )
 
     producto = get_object_or_404(Producto, pk=producto_id)
 
@@ -37,7 +45,8 @@ def crear_operacion(request, producto_id):
             operacion = form.save(commit=False)
 
             # Empresa que compra / importa / exporta
-            operacion.empresa = request.user.perfil  
+            # En este punto es_empresa() nos garantiza que el perfil existe
+            operacion.empresa = request.user.perfil
 
             # Producto seleccionado
             operacion.producto = producto
@@ -56,9 +65,6 @@ def crear_operacion(request, producto_id):
         'form': form,
         'producto': producto,
     })
-
-
-
 # -----------------------------------------------------------
 #  Listar mis operaciones
 # -----------------------------------------------------------
@@ -66,16 +72,46 @@ def crear_operacion(request, producto_id):
 @login_required
 def mis_operaciones(request):
     """
-    Lista las operaciones comerciales de la empresa logueada.
+    Lista las operaciones comerciales asociadas a la empresa logueada.
+    - Si el usuario no tiene perfil -> mensaje + lista vacía.
+    - Si el usuario tiene perfil pero no es 'empresa' -> mensaje + lista vacía.
+    - Si es empresa y no tiene operaciones -> mensaje + lista vacía.
     """
 
-    operaciones = (
-        OperacionComercial.objects
-        .filter(empresa=request.user.perfil)
-        .order_by('-fecha_creacion')
-    )
+    user = request.user
+    operaciones = OperacionComercial.objects.none()
+    mensaje = None
 
-    return render(request, 'operaciones/mis_operaciones.html', {'operaciones': operaciones})
+    # Intentamos obtener el perfil de forma segura
+    try:
+        perfil = user.perfil
+    except ObjectDoesNotExist:
+        perfil = None
+
+    if perfil is None:
+        # Caso: admin u otro usuario sin registro en Perfil
+        mensaje = "No tienes un perfil asociado, por lo que no existen operaciones registradas."
+    elif perfil.rol != 'empresa':
+        # Caso: perfil existe pero no es empresa (ej. productor)
+        mensaje = "Esta sección es solo para empresas. Tu usuario no tiene operaciones como empresa."
+    else:
+        # Caso: empresa con perfil correcto
+        operaciones = (
+            OperacionComercial.objects
+            .filter(empresa=perfil)
+            .order_by('-fecha_creacion')
+        )
+        if not operaciones.exists():
+            mensaje = "Todavía no tienes operaciones registradas."
+
+    return render(
+        request,
+        'operaciones/mis_operaciones.html',
+        {
+            'operaciones': operaciones,
+            'mensaje': mensaje,
+        }
+    )
 
 
 # -----------------------------------------------------------
@@ -90,10 +126,17 @@ def detalle_operacion(request, operacion_id):
     - Estado
     - Documentos asociados
     - Formulario para subir documentos
+    Solo la empresa dueña de la operación puede verla.
     """
     operacion = get_object_or_404(OperacionComercial, pk=operacion_id)
 
-    if operacion.empresa != request.user.perfil:
+    # Obtener perfil de forma segura
+    try:
+        perfil = request.user.perfil
+    except ObjectDoesNotExist:
+        return HttpResponseForbidden("No tienes un perfil asociado para ver esta operación.")
+
+    if operacion.empresa != perfil:
         return HttpResponseForbidden("No puedes ver esta operación.")
 
     documentos = operacion.documentos.all()
@@ -119,8 +162,15 @@ def subir_documento(request, operacion_id):
     """
     operacion = get_object_or_404(OperacionComercial, pk=operacion_id)
 
-    if operacion.empresa != request.user.perfil:
-        return HttpResponseForbidden("No tienes permiso para subir documentos para esta operación.")
+    try:
+        perfil = request.user.perfil
+    except ObjectDoesNotExist:
+        return HttpResponseForbidden("No tienes un perfil asociado para subir documentos.")
+
+    if operacion.empresa != perfil:
+        return HttpResponseForbidden(
+            "No tienes permiso para subir documentos para esta operación."
+        )
 
     if request.method == 'POST':
         form = DocumentoAduaneroForm(request.POST, request.FILES)
@@ -145,7 +195,12 @@ def cambiar_estado(request, operacion_id, nuevo_estado):
     """
     operacion = get_object_or_404(OperacionComercial, pk=operacion_id)
 
-    if operacion.empresa != request.user.perfil:
+    try:
+        perfil = request.user.perfil
+    except ObjectDoesNotExist:
+        return HttpResponseForbidden("No tienes un perfil asociado para modificar esta operación.")
+
+    if operacion.empresa != perfil:
         return HttpResponseForbidden("No tienes permiso para modificar esta operación.")
 
     ESTADOS_VALIDOS = ['pendiente', 'en_proceso', 'en_transito', 'finalizado', 'cancelado']
@@ -213,7 +268,11 @@ def reporte_por_pais(request):
         .order_by('pais_destino')
     )
 
-    paises = OperacionComercial.objects.values_list('pais_destino', flat=True).distinct()
+    paises = (
+        OperacionComercial.objects
+        .values_list('pais_destino', flat=True)
+        .distinct()
+    )
 
     return render(request, 'reportes/por_pais.html', {
         'resumen': resumen,
@@ -256,6 +315,11 @@ def reporte_productos(request):
     }
     return render(request, 'reportes/productos.html', context)
 
+
+# -----------------------------------------------------------
+#  Reporte completo
+# -----------------------------------------------------------
+
 @login_required
 def reporte_completo(request):
     """
@@ -264,9 +328,12 @@ def reporte_completo(request):
     - Estado
     - País de destino
     """
-    operaciones = OperacionComercial.objects.select_related(
-        'producto', 'empresa', 'productor'
-    ).prefetch_related('documentos').all()
+    operaciones = (
+        OperacionComercial.objects
+        .select_related('producto', 'empresa', 'productor')
+        .prefetch_related('documentos')
+        .all()
+    )
 
     # Filtros
     producto_id = request.GET.get('producto')
@@ -281,9 +348,12 @@ def reporte_completo(request):
         operaciones = operaciones.filter(pais_destino=pais_destino)
 
     # Opcional: total de cantidad por producto
-    total_por_producto = operaciones.values('producto__nombre').annotate(
-        total_cantidad=Sum('cantidad')
-    ).order_by('-total_cantidad')
+    total_por_producto = (
+        operaciones
+        .values('producto__nombre')
+        .annotate(total_cantidad=Sum('cantidad'))
+        .order_by('-total_cantidad')
+    )
 
     context = {
         'operaciones': operaciones,
